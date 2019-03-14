@@ -5,7 +5,7 @@ import binascii
 import shamir
 
 
-_PRIME = 2**8191 - 1
+_PRIME = 2**4423 - 1
 
 _rint = functools.partial(random.SystemRandom().randint, 0)
 
@@ -47,7 +47,14 @@ def int_to_str(msg_int):
 def generate_secret_from_msg(msg, req, total):
 	secret, points = make_msg_secret_shares(msg, req, total)
 	if msg != int_to_str(shamir.recover_secret(points, _PRIME)):
-		raise ValueError("msg can't recover, probably the msg too long")
+		errmsg = "msg can't recover, probably the msg too long.\n" \
+		         "max len is 553 chars, your msg len is " + str(len(msg)) + " length"
+		raise ValueError(errmsg)
+	return points
+
+
+def make_fake_msg(shares):
+	secret, points = shamir.make_random_shares(shares, shares)
 	return points
 
 
@@ -57,6 +64,7 @@ def recover_secret(shares):
 
 def run():
 	msg = ""
+	print(len(msg))
 	points = generate_secret_from_msg(msg, 3, 4)
 	for point in points:
 		print(point)

@@ -47,23 +47,21 @@ def service_connection(key, mask):
             data.outb = data.outb[sent:]
 
 
-if len(sys.argv) != 4:
-    print("usage:", sys.argv[0], "<host> <port> <num_connections>")
-    sys.exit(1)
+def run_client_to_server(host, port, num_conns, msg, location):
+    global messages
+    messages = msg
+    start_connections(host, int(port), int(num_conns))
 
-host, port, num_conns = sys.argv[1:4]
-start_connections(host, int(port), int(num_conns))
-
-try:
-    while True:
-        events = sel.select(timeout=1)
-        if events:
-            for key, mask in events:
-                service_connection(key, mask)
-        # Check for a socket being monitored to continue.
-        if not sel.get_map():
-            break
-except KeyboardInterrupt:
-    print("caught keyboard interrupt, exiting")
-finally:
-    sel.close()
+    try:
+        while True:
+            events = sel.select(timeout=1)
+            if events:
+                for key, mask in events:
+                    service_connection(key, mask)
+            # Check for a socket being monitored to continue.
+            if not sel.get_map():
+                break
+    except KeyboardInterrupt:
+        print("caught keyboard interrupt, exiting")
+    finally:
+        sel.close()

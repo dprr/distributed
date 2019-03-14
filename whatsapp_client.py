@@ -22,6 +22,7 @@ class WhatsappClient:
 			vector_of_msgs = []
 			for msg in vector_of_points:
 				vector_of_msgs.append(int_to_bytes(msg[index][1]))
+				assert msg[index][1] == int_from_bytes(int_to_bytes(msg[index][1]))
 			client.run_client_to_server(host, port, 1, vector_of_msgs, 0)
 
 	def __create_msg(self):

@@ -50,6 +50,7 @@ def generate_secret_from_msg(msg, req, total):
 		raise ValueError("msg can't recover, probably the msg too long")
 	return points
 
+
 def recover_secret(shares):
 	return int_to_str(shamir.recover_secret(shares, _PRIME))
 

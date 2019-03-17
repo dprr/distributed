@@ -1,15 +1,15 @@
 import client
 import ssss_lib
 import random
+from constants import *
 
-LEN_OF_BOARD = 10
 
 def int_to_bytes(x):
-    return x.to_bytes((x.bit_length() + 7) // 8, 'big')
+	return x.to_bytes((x.bit_length() + 7) // 8, 'big')
 
 
 def int_from_bytes(xbytes):
-    return int.from_bytes(xbytes, 'big')
+	return int.from_bytes(xbytes, 'big')
 
 
 class WhatsappClient:
@@ -37,7 +37,6 @@ class WhatsappClient:
 		self.__send_to_servers(vector_of_points)
 
 		print("your msg was sent successfully")
-
 
 	def __send_noise_to_all_locations_in_board(self):
 		num_of_servers = len(self.__servers_list)

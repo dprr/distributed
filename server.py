@@ -2,13 +2,11 @@ import sys
 import socket
 import selectors
 import types
-import time
+from constants import *
 
-# TODO: change the vector size
-SIZE = 10
-messagesVec = [0] * SIZE
 
 sel = selectors.DefaultSelector()
+
 
 def accept_wrapper(sock):
     conn, addr = sock.accept()  # Should be ready to read

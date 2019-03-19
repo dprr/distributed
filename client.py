@@ -5,8 +5,11 @@ import types
 
 
 class Client:
-    def __init__(self):
+    def __init__(self, host, port, num_conns):
+        self.messages = ""
         self.sel = selectors.DefaultSelector()
+        self.start_connections(host, int(port), int(num_conns))
+
 
     def start_connections(self, host, port, num_conns):
         server_addr = (host, port)
@@ -19,9 +22,9 @@ class Client:
             events = selectors.EVENT_READ | selectors.EVENT_WRITE
             data = types.SimpleNamespace(
                 connid=connid,
-                msg_total=sum(len(m) for m in messages),
+                msg_total=sum(len(m) for m in self.messages),
                 recv_total=0,
-                messages=list(messages),
+                messages=list(self.messages),
                 outb=b"",
             )
             self.sel.register(sock, events, data=data)
@@ -42,15 +45,13 @@ class Client:
                 sent = sock.send(data.outb)  # Should be ready to write
                 data.outb = data.outb[sent:]
 
-    def close_connection(self,sock):
+    def close_connection(self, sock):
         print("closing connection")
         self.sel.unregister(sock)
         sock.close()
 
-    def run_client_to_server(self, host, port, num_conns, msg):
-        global messages
-        messages = msg
-        self.start_connections(host, int(port), int(num_conns))
+    def run_client_to_server(self, msg):
+        self.messages = msg
         try:
             while True:
                 events = self.sel.select(timeout=1)

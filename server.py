@@ -26,7 +26,7 @@ class Server:
                 data.outb += recv_data
             else:
                 print("closing connection to", data.addr)
-                sel.unregister(sock)
+                self.sel.unregister(sock)
                 sock.close()
         if mask & selectors.EVENT_WRITE:
             if data.outb:

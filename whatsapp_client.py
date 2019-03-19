@@ -49,7 +49,7 @@ class WhatsappClient:
         for i in range(LEN_OF_BOARD):
             vector_of_points.append(
                 ssss_lib.generate_secret_from_msg("", num_of_evil_servers + 1, num_of_servers))
-        vector_of_points[random.randint(0, LEN_OF_BOARD)] = points
+        vector_of_points[random.randint(0, LEN_OF_BOARD - 1)] = points
         self.__send_to_servers(vector_of_points)
         if self.__msg_str == "":
             print("you've sent an empty msg to the servers in order to maintain anonymity in the group")

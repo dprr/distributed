@@ -2,11 +2,16 @@ import sys
 import socket
 import selectors
 import types
-from constants import *
 
 class Server:
-    def __init__(self):
+    def __init__(self, host, port):
         self.sel = selectors.DefaultSelector()
+        lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        lsock.bind((host, port))
+        lsock.listen()
+        print("listening on", (host, port))
+        lsock.setblocking(False)
+        self.sel.register(lsock, selectors.EVENT_READ, data=None)
 
     def accept_wrapper(self, sock):
         conn, addr = sock.accept()  # Should be ready to read
@@ -34,14 +39,7 @@ class Server:
                 sent = sock.send(data.outb)  # Should be ready to write
                 data.outb = data.outb[sent:]
 
-    def run_server(self, host, port):
-        lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        lsock.bind((host, port))
-        lsock.listen()
-        print("listening on", (host, port))
-        lsock.setblocking(False)
-        self.sel.register(lsock, selectors.EVENT_READ, data=None)
-
+    def run_server(self):
         try:
             while True:
                 events = self.sel.select(timeout=None)
@@ -60,5 +58,5 @@ if __name__ == '__main__':
         print("usage:", sys.argv[0], "<host> <port>")
         sys.exit(1)
     host, port = sys.argv[1], int(sys.argv[2])
-    s = Server()
-    s.run_server(host,port)
+    s = Server(host,port)
+    s.run_server()

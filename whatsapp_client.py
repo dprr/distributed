@@ -14,7 +14,7 @@ class WhatsappClient:
         self.__msg_str = ""
         self.__keep_running = True
         for i in range(len(servers_list)):
-            self.__clients.append(client.Client(servers_list[i][0], servers_list[i][1], 1))
+            self.__clients.append(client.Client(servers_list[i][0], servers_list[i][1]))
 
     def __get_num_of_servers(self):
         num = len(self.__servers_list)
@@ -35,7 +35,7 @@ class WhatsappClient:
         print("enter your msg: ")
         self.__msg_str = input()
         print("your msg was saved successfully, you can create new msg but your old msg will be deleted")
-        # self.__send_msg()
+        self.__send_msg()
 
     def __send_msg(self):
         num_of_servers = self.__get_num_of_servers()
@@ -55,6 +55,8 @@ class WhatsappClient:
 
     def __stop_running(self):
         self.__keep_running = False
+        for c in self.__clients:
+            c.close_connection()
 
     def run_client(self):
         # ask the user what he would like to do?
@@ -85,6 +87,7 @@ class WhatsappClient:
 
 if __name__ == "__main__":
     my_client = WhatsappClient([("127.0.0.1", 9000)])
+    # my_client = WhatsappClient([("127.0.0.1", 9000),("127.0.0.1", 9001),("127.0.0.1", 9002),("127.0.0.1", 9003)])
     client_actions_thread = threading.Thread(group=None, target=my_client.run_client, name="client action thread")
     client_sending_msgs_thread = threading.Thread(group=None, target=my_client.sending_msgs,
                                                   name="client sending msgs thread")

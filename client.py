@@ -5,29 +5,20 @@ import types
 
 
 class Client:
-    def __init__(self, host, port, num_conns):
-        self.messages = ""
+    def __init__(self, host, port):
         self.sel = selectors.DefaultSelector()
-        self.start_connections(host, int(port), int(num_conns))
-
-
-    def start_connections(self, host, port, num_conns):
-        server_addr = (host, port)
-        for i in range(0, num_conns):
-            connid = i + 1
-            print("starting connection", connid, "to", server_addr)
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.setblocking(False)
-            sock.connect_ex(server_addr)
-            events = selectors.EVENT_READ | selectors.EVENT_WRITE
-            data = types.SimpleNamespace(
-                connid=connid,
-                msg_total=sum(len(m) for m in self.messages),
-                recv_total=0,
-                messages=list(self.messages),
-                outb=b"",
-            )
-            self.sel.register(sock, events, data=data)
+        server_addr = (host, int(port))
+        print("starting connection to", server_addr)
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.setblocking(False)
+        self.sock.connect_ex(server_addr)
+        self.events = selectors.EVENT_READ | selectors.EVENT_WRITE
+        self.data = types.SimpleNamespace(
+            recv_total=0,
+            messages="",
+            outb=b"",
+        )
+        self.sel.register(self.sock, self.events, data=self.data)
 
     def service_connection(self, key, mask):
         sock = key.fileobj
@@ -35,23 +26,24 @@ class Client:
         if mask & selectors.EVENT_READ:
             recv_data = sock.recv(1024)  # Should be ready to read
             if recv_data:
-                print("received", repr(recv_data), "from connection", data.connid)
+                print("received", repr(recv_data))
                 data.recv_total += len(recv_data)
         if mask & selectors.EVENT_WRITE:
             if not data.outb and data.messages:
                 data.outb = data.messages.pop(0)
             if data.outb:
-                print("sending", repr(data.outb), "to connection", data.connid)
+                print("sending", repr(data.outb))
+                print(data.outb)
                 sent = sock.send(data.outb)  # Should be ready to write
                 data.outb = data.outb[sent:]
 
-    def close_connection(self, sock):
+    def close_connection(self):
         print("closing connection")
-        self.sel.unregister(sock)
-        sock.close()
+        self.sel.unregister(self.sock)
+        self.sock.close()
 
     def run_client_to_server(self, msg):
-        self.messages = msg
+        self.data.messages = msg
         try:
             while True:
                 events = self.sel.select(timeout=1)

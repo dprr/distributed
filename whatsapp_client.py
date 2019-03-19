@@ -3,6 +3,24 @@ import ssss_lib
 import random
 import warnings
 from constants import *
+import signal
+
+def alarm_handler(signum, frame):
+    raise TimeoutError
+
+
+def input_with_timeout(prompt, timeout):
+    # set signal handler
+    signal.signal(signal.SIGALRM, alarm_handler)
+    signal.alarm(timeout) # produce SIGALRM in `timeout` seconds
+
+    try:
+        return input(prompt)
+    except TimeoutError:
+        return "e"
+    finally:
+        signal.alarm(0) # cancel alarm
+
 
 
 def int_to_bytes(x):
@@ -62,15 +80,15 @@ class WhatsappClient:
 		# a. add new server (should this be automatic?)
 		# b. send an honest msg to the servers
 		# c. read the msgs that sent
-		# d. send gibbrish in order to break the msgs of this epoch
+		# d. send empty msg
 		# e. exit the program
 		while True:
-			print("What would you like to do?\n"
-			      "(s)end an honest msg\n"
-			      "(r)ead the msgs that were sent\n"
-				  "send an (e)mpty msg\n"
-			      "(q)uit")
-			action = input()
+			msg_to_clinet = "What would you like to do?\n" \
+			      "(s)end an honest msg\n" \
+			      "(r)ead the msgs that were sent\n" \
+				  "send an (e)mpty msg\n" \
+			      "(q)uit"
+			action = input_with_timeout(msg_to_clinet, EPOCH)
 			if action == "s":
 				self.__create_msg()
 			if action == "r":
@@ -82,5 +100,5 @@ class WhatsappClient:
 # 			TODO - if nothing from client for t time - run __send_nothing
 
 if __name__ == "__main__":
-	my_client = WhatsappClient([("127.0.0.1", 9000), ("127.0.0.1", 9001), ("127.0.0.1", 9002), ("127.0.0.1", 9003)])
+	my_client = WhatsappClient([("127.0.0.1", 9000)])
 	my_client.run_client()

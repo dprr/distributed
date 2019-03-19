@@ -16,6 +16,8 @@ def int_from_bytes(xbytes):
 class WhatsappClient:
 	def __init__(self, servers_list):
 		self.__servers_list = servers_list
+		self.client = client.Client()
+
 
 	def __get_num_of_servers(self):
 		num = len(self.__servers_list)
@@ -31,7 +33,7 @@ class WhatsappClient:
 			for msg in vector_of_points:
 				vector_of_msgs.append(int_to_bytes(msg[index][1]))
 				assert msg[index][1] == int_from_bytes(int_to_bytes(msg[index][1]))
-			client.run_client_to_server(host, port, 1, vector_of_msgs, 0)
+			self.client.run_client_to_server(host, port, 1, vector_of_msgs)
 
 	def __create_msg(self):
 		num_of_servers = self.__get_num_of_servers()

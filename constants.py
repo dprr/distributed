@@ -7,3 +7,11 @@ SIZE = 10
 messagesVec = [0] * SIZE
 
 EPOCH = 10
+
+
+def int_to_bytes(x):
+    return x.to_bytes((x.bit_length() + 7) // 8, 'big')
+
+
+def int_from_bytes(xbytes):
+    return int.from_bytes(xbytes, 'big')

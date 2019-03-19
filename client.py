@@ -63,5 +63,5 @@ class Client:
                     break
         except KeyboardInterrupt:
             print("caught keyboard interrupt, exiting")
-        finally:
-            self.sel.close()
+        # finally:
+        #     self.sel.close()

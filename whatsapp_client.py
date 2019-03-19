@@ -3,40 +3,14 @@ import ssss_lib
 import random
 import warnings
 from constants import *
-import signal
-
-
-def alarm_handler(signum, frame):
-    raise TimeoutError
-
-
-def input_with_timeout(prompt, timeout):
-    # set signal handler
-    signal.signal(signal.SIGALRM, alarm_handler)
-    signal.alarm(timeout)  # produce SIGALRM in `timeout` seconds
-
-    try:
-        return input(prompt)
-    except TimeoutError:
-        return "e"
-    finally:
-        signal.alarm(0)  # cancel alarm
-
-
-def int_to_bytes(x):
-    return x.to_bytes((x.bit_length() + 7) // 8, 'big')
-
-
-def int_from_bytes(xbytes):
-    return int.from_bytes(xbytes, 'big')
 
 
 class WhatsappClient:
     def __init__(self, servers_list):
         self.__servers_list = servers_list
-        self.clients = []
+        self.__clients = []
         for i in range(len(servers_list)):
-            self.clients.append(client.Client(servers_list[i][0], servers_list[i][1], 1))
+            self.__clients.append(client.Client(servers_list[i][0], servers_list[i][1], 1))
 
     def __get_num_of_servers(self):
         num = len(self.__servers_list)
@@ -46,13 +20,12 @@ class WhatsappClient:
         return num
 
     def __send_to_servers(self, vector_of_points):
-        for index, server in enumerate(self.__servers_list):
-            host, port = server
+        for index, cli in enumerate(self.__clients):
             vector_of_msgs = []
             for msg in vector_of_points:
                 vector_of_msgs.append(int_to_bytes(msg[index][1]))
                 assert msg[index][1] == int_from_bytes(int_to_bytes(msg[index][1]))
-            self.clients[index].run_client_to_server(vector_of_msgs)
+            cli.run_client_to_server(vector_of_msgs)
 
     def __create_msg(self):
         num_of_servers = self.__get_num_of_servers()
@@ -92,8 +65,8 @@ class WhatsappClient:
                             "(s)end an honest msg\n" \
                             "(r)ead the msgs that were sent\n" \
                             "send an (e)mpty msg\n" \
-                            "(q)uit"
-            action = input_with_timeout(msg_to_clinet, EPOCH)
+                            "(q)uit\n"
+            action = input(msg_to_clinet)
             if action == "s":
                 self.__create_msg()
             if action == "r":

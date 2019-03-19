@@ -8,10 +8,13 @@ from constants import *
 _rint = functools.partial(random.SystemRandom().randint, 0)
 
 
-def make_msg_secret_shares(msg, minimum, shares, prime=PRIME_SSSS):
+def __make_msg_secret_shares(msg, minimum, shares, prime=PRIME_SSSS):
 	"""
-	Generates a shamir pool, returns
-	the secret and the share points.
+	:param msg: the msg to hide
+	:param minimum: how many points needs to recover the msg
+	:param shares: how many points will be crate
+	:return: Generates a shamir pool, returns
+	the secret and the share points. as tuple (secret, share points)
 	"""
 	if minimum > shares:
 		raise ValueError("pool secret would be irrecoverable")
@@ -23,6 +26,7 @@ def make_msg_secret_shares(msg, minimum, shares, prime=PRIME_SSSS):
 
 def str_to_int(msg_str):
 	"""
+	:param msg_str: the msg
 	:return: msg as int
 	"""
 	if msg_str != "":
@@ -33,6 +37,10 @@ def str_to_int(msg_str):
 
 
 def int_to_str(msg_int):
+	"""
+	:param msg_int: msg as int
+	:return: the msg
+	"""
 	if msg_int == 0:
 		return ""
 	try:
@@ -43,31 +51,42 @@ def int_to_str(msg_int):
 
 
 def generate_secret_from_msg(msg, req, total):
-	secret, points = make_msg_secret_shares(msg, req, total)
+	"""
+	:param msg: the msg to hide
+	:param req: how many points need to recover the msg
+	:param total: how many point to create
+	:return: points to send to servers
+	"""
+	secret, points = __make_msg_secret_shares(msg, req, total)
+	if len(msg) > MAX_MSG_LEN:
+		errmsg = "msg can't be recovered, the msg is too long.\n" \
+				 "max len is " + MAX_MSG_LEN + " chars, your msg len is " + str(len(msg)) + " chars"
+		raise ValueError(errmsg)
 	if msg != int_to_str(shamir.recover_secret(points, PRIME_SSSS)):
-		errmsg = "msg can't recover, probably the msg too long.\n" \
-		         "max len is 553 chars, your msg len is " + str(len(msg)) + " length"
+		errmsg = "msg can't be recovered, for unknown reason, please contact us"
 		raise ValueError(errmsg)
 	return points
 
 
-def make_fake_msg(shares):
-	secret, points = shamir.make_random_shares(shares, shares)
-	return points
-
-
 def recover_secret(shares):
-	return int_to_str(shamir.recover_secret(shares, PRIME_SSSS))
+	"""
+	:param shares: list of points as following: [(server number, server number),...,(server number, server number)]
+	:return: the msg as int. this function doesn't check if the msg is valid.
+	"""
+	return shamir.recover_secret(shares, PRIME_SSSS)
 
 
 def run():
+	"""
+	demo of this lib
+	"""
 	msg = ""
 	print(len(msg))
-	points = generate_secret_from_msg(msg, 3, 4)
+	points = generate_secret_from_msg(msg, 2, 4)
 	for point in points:
 		print(point)
 
-	print(recover_secret([points[0], points[3], points[2]]))
+	print(int_to_str(recover_secret([points[0], points[3], points[2]])))
 
 
 if __name__ == "__main__":

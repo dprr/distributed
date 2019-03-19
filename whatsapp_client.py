@@ -2,13 +2,17 @@ import client
 import ssss_lib
 import random
 import warnings
+import threading
 from constants import *
+import time
 
 
 class WhatsappClient:
     def __init__(self, servers_list):
         self.__servers_list = servers_list
         self.__clients = []
+        self.__msg_str = ""
+        self.__keep_running = True
         for i in range(len(servers_list)):
             self.__clients.append(client.Client(servers_list[i][0], servers_list[i][1], 1))
 
@@ -28,30 +32,29 @@ class WhatsappClient:
             cli.run_client_to_server(vector_of_msgs)
 
     def __create_msg(self):
+        print("enter your msg: ")
+        self.__msg_str = input()
+        print("your msg was saved successfully, you can create new msg but your old msg will be deleted")
+        # self.__send_msg()
+
+    def __send_msg(self):
         num_of_servers = self.__get_num_of_servers()
         num_of_evil_servers = (num_of_servers - 1) // 3
-        print("enter your msg: ")
-        msg_str = input()
-        points = ssss_lib.generate_secret_from_msg(msg_str, num_of_evil_servers + 1, num_of_servers)
+        points = ssss_lib.generate_secret_from_msg(self.__msg_str, num_of_evil_servers + 1, num_of_servers)
         vector_of_points = []
         for i in range(LEN_OF_BOARD):
             vector_of_points.append(
                 ssss_lib.generate_secret_from_msg("", num_of_evil_servers + 1, num_of_servers))
         vector_of_points[random.randint(0, LEN_OF_BOARD)] = points
         self.__send_to_servers(vector_of_points)
+        if self.__msg_str == "":
+            print("you've sent an empty msg to the servers in order to maintain anonymity in the group")
+        else:
+            print("your msg was sent successfully, you can now send a new msg")
+        self.__msg_str = ""
 
-        print("your msg was sent successfully")
-
-    def __send_nothing(self):
-        num_of_servers = self.__get_num_of_servers()
-        num_of_evil_servers = (num_of_servers - 1) // 3
-        vector_of_points = []
-        for i in range(LEN_OF_BOARD):
-            vector_of_points.append(
-                ssss_lib.generate_secret_from_msg("", num_of_evil_servers + 1, num_of_servers))
-        self.__send_to_servers(vector_of_points)
-
-        print("anonymity saved for all of us!")
+    def __stop_running(self):
+        self.__keep_running = False
 
     def run_client(self):
         # ask the user what he would like to do?
@@ -60,25 +63,30 @@ class WhatsappClient:
         # c. read the msgs that sent
         # d. send empty msg
         # e. exit the program
-        while True:
-            msg_to_clinet = "What would you like to do?\n" \
+        while self.__keep_running:
+            msg_to_client = "What would you like to do?\n" \
                             "(s)end an honest msg\n" \
                             "(r)ead the msgs that were sent\n" \
-                            "send an (e)mpty msg\n" \
                             "(q)uit\n"
-            action = input(msg_to_clinet)
+            action = input(msg_to_client)
             if action == "s":
                 self.__create_msg()
             if action == "r":
                 print("not available right now")
-            if action == "e":
-                self.__send_nothing()
             if action == "q":
-                break
+                self.__stop_running()
 
+    def sending_msgs(self):
+        while self.__keep_running:
+            if int(time.time()) % EPOCH == 0:
+                self.__send_msg()
+                time.sleep(1)
 
-# 			TODO - if nothing from client for t time - run __send_nothing
 
 if __name__ == "__main__":
     my_client = WhatsappClient([("127.0.0.1", 9000)])
-    my_client.run_client()
+    client_actions_thread = threading.Thread(group=None, target=my_client.run_client, name="client action thread")
+    client_sending_msgs_thread = threading.Thread(group=None, target=my_client.sending_msgs,
+                                                  name="client sending msgs thread")
+    client_sending_msgs_thread.start()
+    client_actions_thread.start()

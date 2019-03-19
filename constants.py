@@ -6,3 +6,4 @@ LEN_OF_BOARD = 10
 SIZE = 10
 messagesVec = [0] * SIZE
 
+

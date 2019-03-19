@@ -16,6 +16,10 @@ class WhatsappClient:
         for i in range(len(servers_list)):
             self.__clients.append(client.Client(servers_list[i][0], servers_list[i][1]))
 
+    def close_connection(self):
+        for cli in self.__clients:
+            cli.close_connection()
+
     def __get_num_of_servers(self):
         num = len(self.__servers_list)
         if num == 1:
@@ -45,7 +49,7 @@ class WhatsappClient:
         for i in range(LEN_OF_BOARD):
             vector_of_points.append(
                 ssss_lib.generate_secret_from_msg("", num_of_evil_servers + 1, num_of_servers))
-        vector_of_points[random.randint(0, LEN_OF_BOARD)] = points
+        vector_of_points[random.randint(0, LEN_OF_BOARD - 1)] = points
         self.__send_to_servers(vector_of_points)
         if self.__msg_str == "":
             print("you've sent an empty msg to the servers in order to maintain anonymity in the group")
@@ -93,3 +97,7 @@ if __name__ == "__main__":
                                                   name="client sending msgs thread")
     client_sending_msgs_thread.start()
     client_actions_thread.start()
+
+    client_sending_msgs_thread.join()
+    client_actions_thread.join()
+    my_client.close_connection()

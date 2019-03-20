@@ -20,6 +20,7 @@ class Client:
             outb=b"",
         )
         self.sel.register(self.sock, self.events, data=self.data)
+        self.received_data = ""
 
     def service_connection(self, key, mask):
         sock = key.fileobj
@@ -27,11 +28,12 @@ class Client:
         if mask & selectors.EVENT_READ:
             recv_data = sock.recv(SIZE_OF_MSG)  # Should be ready to read
             if recv_data:
-                print("received", repr(recv_data))
+                # print("received", repr(recv_data))
+                self.received_data = recv_data
                 data.recv_total += len(recv_data)
         if mask & selectors.EVENT_WRITE:
             if not data.outb and data.messages:
-                data.outb = data.messages.pop(0)
+                data.outb = data.messages
             if data.outb:
                 # print("sending", repr(data.outb))
                 # print(data.outb)

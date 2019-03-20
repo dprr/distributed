@@ -5,7 +5,7 @@ LEN_OF_BOARD = 10
 SIZE_OF_MSG = 1024*1024
 
 EPOCH = 10
-SERVER_PORTS = [i for i in range(10000, 10004)]
+SERVER_PORTS = [i for i in range(9000, 9004)]
 local_host = "127.0.0.1"
 
 def int_to_bytes(x):

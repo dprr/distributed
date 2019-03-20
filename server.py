@@ -7,6 +7,9 @@ from constants import *
 import sched
 import time
 
+# TODO - the server died when the client exit.
+
+
 
 class Server:
 	def __init__(self, host, port):
@@ -24,17 +27,29 @@ class Server:
 		print("accepted connection from", addr)
 		conn.setblocking(False)
 		data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"")
-		events = selectors.EVENT_READ
+		events = selectors.EVENT_READ | selectors.EVENT_WRITE
 		self.selector.register(conn, events, data=data)
 
-	def service_connection(self, key):
+	def service_connection(self, key, mask):
 		sock = key.fileobj
 		data = key.data
-		if selectors.EVENT_READ & selectors.EVENT_READ:
+		if mask & selectors.EVENT_READ:
 			recv_data = sock.recv(SIZE_OF_MSG)  # Should be ready to read
-			data.outb += recv_data
-		received_data = pickle.loads(data.outb)
-		self.__message_vector = [a + b for a, b in zip(received_data, self.__message_vector)]
+			if recv_data:
+				data.outb += recv_data
+			else:
+				print("closing connection to", data.addr)
+				self.selector.unregister(sock)
+				sock.close()
+			received_data = pickle.loads(data.outb)
+			self.__message_vector = [a + b for a, b in zip(received_data, self.__message_vector)]
+		if mask & selectors.EVENT_WRITE:
+			if data.outb:
+				# TODO - need to verify that all the data has been sent
+				sent = sock.send(pickle.dumps(self.__message_vector))
+				data.outb = data.outb[sent:]
+				self.__message_vector = [0] * LEN_OF_BOARD
+
 
 	def __return_to_client(self):
 		while True:
@@ -46,12 +61,12 @@ class Server:
 	def run_server(self):
 		try:
 			while True:
-				keys = self.selector.select(timeout=None)[0]
-				for key in keys:
+				keys = self.selector.select(timeout=None)
+				for key, mask in keys:
 					if key.data is None:
 						self.accept_wrapper(key.fileobj)
 					else:
-						self.service_connection(key)
+						self.service_connection(key, mask)
 		except KeyboardInterrupt:
 			print("caught keyboard interrupt, exiting")
 		finally:

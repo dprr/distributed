@@ -87,8 +87,7 @@ class WhatsappClient:
 
 
 if __name__ == "__main__":
-    # my_client = WhatsappClient([("127.0.0.1", 9000)])
-    my_client = WhatsappClient([("127.0.0.1", 9000),("127.0.0.1", 9001),("127.0.0.1", 9002),("127.0.0.1", 9003)])
+    my_client = WhatsappClient([(local_host, i) for i in CLIENT_PORTS])
     client_actions_thread = threading.Thread(group=None, target=my_client.run_client, name="client action thread")
     client_sending_msgs_thread = threading.Thread(group=None, target=my_client.sending_msgs,
                                                   name="client sending msgs thread")

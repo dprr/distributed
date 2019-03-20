@@ -100,7 +100,7 @@ class WhatsappClient:
 			temp = []
 			for msg in cli.get_msgs_from_server():
 				temp.append((index + 1, msg))
-			board.append(temp)
+			board.append(temp) # TODO - what happen if evil server not sending anything?
 		vector_of_points = list(map(list, zip(*board)))
 		msgs = []
 		for shares in vector_of_points:

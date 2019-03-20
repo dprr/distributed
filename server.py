@@ -4,11 +4,11 @@ import selectors
 import types
 import pickle
 from constants import *
-import time
+import random
 
-# TODO - the server died when the client exit.
-# TODO - create an evil server (can send gibberish)
 # TODO - why does client received only her own msgs only? (and not everyone's)
+PORT = ""
+EVIL = False
 
 class Server:
 	def __init__(self, host, port):
@@ -33,7 +33,11 @@ class Server:
 		sock = key.fileobj
 		data = key.data
 		if mask & selectors.EVENT_READ:
-			recv_data = sock.recv(SIZE_OF_MSG)  # Should be ready to read
+			recv_data = b''
+			try:
+				recv_data = sock.recv(SIZE_OF_MSG)  # Should be ready to read
+			except ConnectionResetError:
+				exit(0)
 			if recv_data:
 				data.outb += recv_data
 			else:
@@ -42,20 +46,21 @@ class Server:
 				sock.close()
 			received_data = pickle.loads(data.outb)
 			self.__message_vector = [a + b for a, b in zip(received_data, self.__message_vector)]
+			# writing vector that way all will get the same vector
+			# with open(str(PORT) + ".txt", 'bw') as f:
+			# 	f.write(pickle.dumps(self.__message_vector))
+
 		if mask & selectors.EVENT_WRITE:
 			if data.outb:
+				# with open(str(PORT) + ".txt", "br") as f:
+				# 	temp = f.read()
+				# sent = sock.send(pickle.dumps(temp))
+				if EVIL:
+					self.__message_vector = [random.randint() for _ in range(LEN_OF_BOARD)]
 				sent = sock.send(pickle.dumps(self.__message_vector))
 				data.outb = data.outb[sent:]
 				assert len(data.outb) == 0
 				self.__message_vector = [0] * LEN_OF_BOARD
-
-
-	def __return_to_client(self):
-		while True:
-			if int(time.time()) % EPOCH == 0:
-				# send_to_clients(self.__message_vector)
-				self.__message_vector = [0] * LEN_OF_BOARD
-				time.sleep(1)
 
 	def run_server(self):
 		try:
@@ -66,6 +71,7 @@ class Server:
 						self.accept_wrapper(key.fileobj)
 					else:
 						self.service_connection(key, mask)
+
 		except KeyboardInterrupt:
 			print("caught keyboard interrupt, exiting")
 		finally:
@@ -73,9 +79,12 @@ class Server:
 
 
 if __name__ == '__main__':
-	if len(sys.argv) != 3:
+	if len(sys.argv) < 3:
 		print("usage:", sys.argv[0], "<host> <port>")
 		sys.exit(1)
+	if len(sys.argv) == 4 and sys.argv[3] == "evil":
+		EVIL = True
 	host, port = sys.argv[1], int(sys.argv[2])
+	PORT = port
 	s = Server(host, port)
 	s.run_server()

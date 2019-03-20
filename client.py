@@ -50,8 +50,6 @@ class Client:
             if not data.outb and data.messages:
                 data.outb = data.messages
             if data.outb:
-                # print("sending", repr(data.outb))
-                # print(data.outb)
                 sent = sock.send(data.outb)  # Should be ready to write
                 data.outb = data.outb[sent:]
 

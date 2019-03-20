@@ -39,7 +39,7 @@ class Server:
 	def __return_to_client(self):
 		while True:
 			if int(time.time()) % EPOCH == 0:
-				send_to_clients(self.__message_vector)
+				# send_to_clients(self.__message_vector)
 				self.__message_vector = [0] * LEN_OF_BOARD
 				time.sleep(1)
 

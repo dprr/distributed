@@ -11,7 +11,7 @@ import time
 class Server:
 	def __init__(self, host, port):
 		self.selector = selectors.DefaultSelector()
-		self.__message_vector = [0] * SIZE
+		self.__message_vector = [0] * LEN_OF_BOARD
 		lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		lsock.bind((host, port))
 		lsock.listen()
@@ -31,10 +31,17 @@ class Server:
 		sock = key.fileobj
 		data = key.data
 		if selectors.EVENT_READ & selectors.EVENT_READ:
-			recv_data = sock.recv(1024)  # Should be ready to read
+			recv_data = sock.recv(SIZE_OF_MSG)  # Should be ready to read
 			data.outb += recv_data
 		received_data = pickle.loads(data.outb)
 		self.__message_vector = [a + b for a, b in zip(received_data, self.__message_vector)]
+
+	def __return_to_client(self):
+		while True:
+			if int(time.time()) % EPOCH == 0:
+				send_to_clients(self.__message_vector)
+				self.__message_vector = [0] * LEN_OF_BOARD
+				time.sleep(1)
 
 	def run_server(self):
 		try:

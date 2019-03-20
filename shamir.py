@@ -37,7 +37,7 @@ def _eval_at(poly, x, prime):
 	return accum
 
 
-def make_random_shares(minimum, shares, prime=PRIME_shamir):
+def make_random_shares(minimum, shares, prime=PRIME):
 	"""
 	Generates a random shamir pool, returns
 	the secret and the share points.
@@ -103,7 +103,7 @@ def _lagrange_interpolate(x, x_s, y_s, p):
 	return (_divmod(num, den, p) + p) % p
 
 
-def recover_secret(shares, prime=PRIME_shamir):
+def recover_secret(shares, prime=PRIME):
 	"""
 	Recover the secret from share points
 	(x,y points on the polynomial)

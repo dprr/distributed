@@ -8,7 +8,7 @@ from constants import *
 _rint = functools.partial(random.SystemRandom().randint, 0)
 
 
-def __make_msg_secret_shares(msg, minimum, shares, prime=PRIME_SSSS):
+def __make_msg_secret_shares(msg, minimum, shares, prime=PRIME):
 	"""
 	:param msg: the msg to hide
 	:param minimum: how many points needs to recover the msg
@@ -62,7 +62,7 @@ def generate_secret_from_msg(msg, req, total):
 		errmsg = "msg can't be recovered, the msg is too long.\n" \
 				 "max len is " + MAX_MSG_LEN + " chars, your msg len is " + str(len(msg)) + " chars"
 		raise ValueError(errmsg)
-	if msg != int_to_str(shamir.recover_secret(points, PRIME_SSSS)):
+	if msg != int_to_str(shamir.recover_secret(points, PRIME)):
 		errmsg = "msg can't be recovered, for unknown reason, please contact us"
 		raise ValueError(errmsg)
 	return points
@@ -73,7 +73,7 @@ def recover_secret(shares):
 	:param shares: list of points as following: [(server number, server number),...,(server number, server number)]
 	:return: the msg as int. this function doesn't check if the msg is valid.
 	"""
-	return shamir.recover_secret(shares, PRIME_SSSS)
+	return shamir.recover_secret(shares, PRIME)
 
 
 def run():

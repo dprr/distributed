@@ -15,4 +15,5 @@ def print_some_times():
 	print("hi")
 	print(time.time())
 
-print_some_times()
+if __name__ == "__main__":
+	print_some_times()

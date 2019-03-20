@@ -15,6 +15,7 @@ class WhatsappClient:
 		self.__clients = []
 		self.__msg_str = ""
 		self.__keep_running = True
+		self.__board_history = []
 		for i in range(len(servers_list)):
 			self.__clients.append(client.Client(servers_list[i][0], servers_list[i][1]))
 
@@ -48,7 +49,6 @@ class WhatsappClient:
 		print("your msg was saved successfully, you can create new msg but your old msg will be deleted")
 
 	def __send_msg(self):
-		print("start of sending the msg")
 		num_of_servers = self.__get_num_of_servers()
 		num_of_evil_servers = (num_of_servers - 1) // 3
 		points = ssss_lib.generate_secret_from_msg(self.__msg_str, num_of_evil_servers + 1, num_of_servers)
@@ -81,28 +81,55 @@ class WhatsappClient:
 		while self.__keep_running:
 			msg_to_client = "What would you like to do?\n" \
 							"(s)end an honest msg\n" \
-							"(r)ead the msgs that were sent\n" \
+							"(r)ead last msgs that were sent\n" \
+							"(d)ump all msgs\n"\
 							"(q)uit\n"
 			action = input(msg_to_client)
 			if action == "s":
 				self.__create_msg()
 			if action == "r":
-				print("not available right now")
+				self.read_last_msgs()
+			if action == "d":
+				self.read_all_msgs()
 			if action == "q":
 				self.__stop_running()
 
-	def sending_msgs(self):
+	def __get_msgs(self):
+		board = []
+		for index, cli in enumerate(self.__clients):
+			temp = []
+			for msg in cli.get_msgs_from_server():
+				temp.append((index + 1, msg))
+			board.append(temp)
+		vector_of_points = list(map(list, zip(*board)))
+		msgs = []
+		for shares in vector_of_points:
+			# TODO - recover secret with evil server
+			int_msg = ssss_lib.recover_secret(shares)
+			if int_msg != 0:
+				msgs.append(ssss_lib.int_to_str(int_msg))
+		self.__board_history.append(msgs)
+
+	def talking_with_server(self):
 		while self.__keep_running:
 			if int(time.time()) % EPOCH == 0:
 				self.__send_msg()
+				self.__get_msgs()
 				time.sleep(1)
+
+	def read_all_msgs(self):
+		print(self.__board_history)
+
+	def read_last_msgs(self):
+		if len(self.__board_history) != 0:
+			print(self.__board_history[-1])
 
 
 if __name__ == "__main__":
-	# my_client = WhatsappClient([(local_host, i) for i in SERVER_PORTS])
-	my_client = WhatsappClient([(local_host, 9005)])
+	my_client = WhatsappClient([(local_host, i) for i in SERVER_PORTS])
+	# my_client = WhatsappClient([(local_host, 9005)])
 	client_actions_thread = threading.Thread(group=None, target=my_client.run_client, name="client action thread")
-	client_sending_msgs_thread = threading.Thread(group=None, target=my_client.sending_msgs,
+	client_sending_msgs_thread = threading.Thread(group=None, target=my_client.talking_with_server,
 												  name="client sending msgs thread")
 	client_sending_msgs_thread.start()
 	client_actions_thread.start()

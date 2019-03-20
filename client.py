@@ -3,10 +3,12 @@ import socket
 import selectors
 import types
 from constants import *
+from threading import Lock
 
 
 class Client:
     def __init__(self, host, port):
+        self.__received_data_mutex = Lock()
         self.sel = selectors.DefaultSelector()
         server_addr = (host, int(port))
         print("starting connection to", server_addr)
@@ -20,7 +22,18 @@ class Client:
             outb=b"",
         )
         self.sel.register(self.sock, self.events, data=self.data)
-        self.received_data = ""
+        self.__received_data = ""
+
+    def get_msgs_from_server(self):
+        if self.__received_data == "":
+            return ""
+        else:
+            import pickle
+            temp = pickle.loads(self.__received_data)
+            self.__received_data_mutex.acquire()
+            self.__received_data = ""
+            self.__received_data_mutex.release()
+            return temp
 
     def service_connection(self, key, mask):
         sock = key.fileobj
@@ -29,7 +42,9 @@ class Client:
             recv_data = sock.recv(SIZE_OF_MSG)  # Should be ready to read
             if recv_data:
                 # print("received", repr(recv_data))
-                self.received_data = recv_data
+                self.__received_data_mutex.acquire()
+                self.__received_data = recv_data
+                self.__received_data_mutex.release()
                 data.recv_total += len(recv_data)
         if mask & selectors.EVENT_WRITE:
             if not data.outb and data.messages:

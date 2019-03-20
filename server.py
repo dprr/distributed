@@ -4,12 +4,11 @@ import selectors
 import types
 import pickle
 from constants import *
-import sched
 import time
 
 # TODO - the server died when the client exit.
-
-
+# TODO - create an evil server (can send gibberish)
+# TODO - why does client received only her own msgs only? (and not everyone's)
 
 class Server:
 	def __init__(self, host, port):
@@ -45,9 +44,9 @@ class Server:
 			self.__message_vector = [a + b for a, b in zip(received_data, self.__message_vector)]
 		if mask & selectors.EVENT_WRITE:
 			if data.outb:
-				# TODO - need to verify that all the data has been sent
 				sent = sock.send(pickle.dumps(self.__message_vector))
 				data.outb = data.outb[sent:]
+				assert len(data.outb) == 0
 				self.__message_vector = [0] * LEN_OF_BOARD
 
 

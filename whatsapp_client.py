@@ -104,8 +104,10 @@ class WhatsappClient:
 		vector_of_points = list(map(list, zip(*board)))
 		msgs = []
 		for shares in vector_of_points:
-			# TODO - recover secret with evil server
-			int_msg = ssss_lib.recover_secret(shares)
+			# DOTO - recover secret with evil server
+			result = [[shares[i], shares[j]] for i in range(len(shares)) for j in range(i + 1, len(shares))]
+			recovered = [ssss_lib.recover_secret(i) for i in result]
+			int_msg = max(set(recovered), key=recovered.count)
 			if int_msg != 0:
 				msgs.append(ssss_lib.int_to_str(int_msg))
 		self.__board_history.append(msgs)

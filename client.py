@@ -29,11 +29,14 @@ class Client:
             return ""
         else:
             import pickle
-            temp = pickle.loads(self.__received_data)
-            self.__received_data_mutex.acquire()
-            self.__received_data = ""
-            self.__received_data_mutex.release()
-            return temp
+            try:
+                temp = pickle.loads(self.__received_data)
+                self.__received_data_mutex.acquire()
+                self.__received_data = ""
+                self.__received_data_mutex.release()
+                return temp
+            except:
+                return
 
     def service_connection(self, key, mask):
         sock = key.fileobj

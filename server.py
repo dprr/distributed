@@ -60,8 +60,11 @@ class Server:
 		with self.__clients_mutex:
 			for sock in self.__clients:
 				if EVIL:
-					self.__message_vector = [random.randint() for _ in range(LEN_OF_BOARD)]
-				sock.sendall(pickle.dumps(self.__message_vector))
+					self.__message_vector = [random.randint(0, PRIME) for _ in range(LEN_OF_BOARD)]
+					if random.randint(0, 9) != 0:
+						sock.sendall(pickle.dumps(self.__message_vector))
+				else:
+					sock.sendall(pickle.dumps(self.__message_vector))
 			self.__message_vector = [0] * LEN_OF_BOARD
 
 	def run_server(self):
@@ -75,6 +78,7 @@ class Server:
 						self.service_connection(key, mask)
 					if int(time.time()) % EPOCH == 5:
 						self.reply_to_client()
+						time.sleep(1)
 		except KeyboardInterrupt:
 			print("caught keyboard interrupt, exiting")
 		finally:

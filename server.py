@@ -8,13 +8,11 @@ import random
 import time
 from threading import Lock
 
-# TODO - why does client received only her own msgs only? (and not everyone's)
 PORT = ""
-EVIL = False
-
 
 class Server:
-	def __init__(self, host, port):
+	def __init__(self, host, port, is_evil = False):
+		self.__evil = is_evil
 		self.selector = selectors.DefaultSelector()
 		self.__message_vector = [0] * LEN_OF_BOARD
 		self.__clients = set()
@@ -59,7 +57,7 @@ class Server:
 	def reply_to_client(self):
 		with self.__clients_mutex:
 			for sock in self.__clients:
-				if EVIL:
+				if self.__evil:
 					self.__message_vector = [random.randint(0, PRIME) for _ in range(LEN_OF_BOARD)]
 					if random.randint(0, 9) != 0:
 						sock.sendall(pickle.dumps(self.__message_vector))
@@ -85,13 +83,17 @@ class Server:
 			self.selector.close()
 
 
+def start_new_server(_host, _port, _is_evil):
+	Server(_host, _port, _is_evil).run_server()
+
+
 if __name__ == '__main__':
+	is_evil = False
 	if len(sys.argv) < 3:
 		print("usage:", sys.argv[0], "<host> <port>")
 		sys.exit(1)
 	if len(sys.argv) == 4 and sys.argv[3] == "evil":
-		EVIL = True
+		is_evil = True
 	host, port = sys.argv[1], int(sys.argv[2])
 	PORT = port
-	s = Server(host, port)
-	s.run_server()
+	start_new_server(host, port, is_evil)

@@ -10,6 +10,7 @@ import pickle
 
 class WhatsappClient:
 	def __init__(self, servers_list):
+		self.__msg_read_counter = 0
 		self.__msg_mutex = threading.Lock()
 		self.__servers_list = servers_list
 		self.__clients = []
@@ -52,11 +53,15 @@ class WhatsappClient:
 		num_of_servers = self.__get_num_of_servers()
 		num_of_evil_servers = (num_of_servers - 1) // 3
 		points = ssss_lib.generate_secret_from_msg(self.__msg_str, num_of_evil_servers + 1, num_of_servers)
+		# points = [(1, 0)]
+		# if self.__msg_str != "":
+		# 	points = [(1, int(self.__msg_str))]
 		vector_of_points = []
 		for i in range(LEN_OF_BOARD):
 			vector_of_points.append(
 				ssss_lib.generate_secret_from_msg("", num_of_evil_servers + 1, num_of_servers))
 		vector_of_points[random.randint(0, LEN_OF_BOARD - 1)] = points
+		# vector_of_points[3] = points
 		self.__send_to_servers(vector_of_points)
 		if self.__msg_str == "":
 			print("you've sent an empty msg to the servers in order to maintain anonymity in the group")
@@ -81,7 +86,7 @@ class WhatsappClient:
 		while self.__keep_running:
 			msg_to_client = "What would you like to do?\n" \
 							"(s)end an honest msg\n" \
-							"(r)ead last msgs that were sent\n" \
+							"(r)ead unread msgs that were sent\n" \
 							"(d)ump all msgs\n"\
 							"(q)uit\n"
 			action = input(msg_to_client)
@@ -121,10 +126,13 @@ class WhatsappClient:
 
 	def read_all_msgs(self):
 		print(self.__board_history)
+		self.__msg_read_counter = len(self.__board_history)
 
 	def read_last_msgs(self):
 		if len(self.__board_history) != 0:
-			print(self.__board_history[-1])
+			index = self.__msg_read_counter
+			self.__msg_read_counter = len(self.__board_history)
+			print(self.__board_history[index:])
 
 
 if __name__ == "__main__":

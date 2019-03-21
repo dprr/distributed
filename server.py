@@ -5,15 +5,20 @@ import types
 import pickle
 from constants import *
 import random
+import time
+from threading import Lock
 
 # TODO - why does client received only her own msgs only? (and not everyone's)
 PORT = ""
 EVIL = False
 
+
 class Server:
 	def __init__(self, host, port):
 		self.selector = selectors.DefaultSelector()
 		self.__message_vector = [0] * LEN_OF_BOARD
+		self.__clients = set()
+		self.__clients_mutex = Lock()
 		lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		lsock.bind((host, port))
 		lsock.listen()
@@ -28,39 +33,59 @@ class Server:
 		data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"")
 		events = selectors.EVENT_READ | selectors.EVENT_WRITE
 		self.selector.register(conn, events, data=data)
+		with self.__clients_mutex:
+			self.__clients.add(conn)
 
 	def service_connection(self, key, mask):
 		sock = key.fileobj
 		data = key.data
 		if mask & selectors.EVENT_READ:
 			recv_data = b''
+			received_data = []
 			try:
 				recv_data = sock.recv(SIZE_OF_MSG)  # Should be ready to read
 			except ConnectionResetError:
 				exit(0)
 			if recv_data:
-				data.outb += recv_data
-			else:
-				print("closing connection to", data.addr)
-				self.selector.unregister(sock)
-				sock.close()
-			received_data = pickle.loads(data.outb)
-			self.__message_vector = [a + b for a, b in zip(received_data, self.__message_vector)]
+				data.outb = recv_data
+				received_data = pickle.loads(data.outb)
+				# print(hex(id(self.__message_vector)))
+				self.__message_vector = [a + b for a, b in zip(received_data, self.__message_vector)]
+			# for index, scalar in enumerate(self.__message_vector):
+			# 	self.__message_vector[index] += received_data[index]
+			# print(self.__message_vector)
 			# writing vector that way all will get the same vector
 			# with open(str(PORT) + ".txt", 'bw') as f:
 			# 	f.write(pickle.dumps(self.__message_vector))
+			else:
+				print("closing connection to", data.addr)
+				with self.__clients_mutex:
+					self.__clients.remove(sock)
+					self.selector.unregister(sock)
+					sock.close()
 
-		if mask & selectors.EVENT_WRITE:
-			if data.outb:
-				# with open(str(PORT) + ".txt", "br") as f:
-				# 	temp = f.read()
-				# sent = sock.send(pickle.dumps(temp))
+
+		# if mask & selectors.EVENT_WRITE:
+		# 	if data.outb:
+		# 		# with open(str(PORT) + ".txt", "br") as f:
+		# 		# 	temp = f.read()
+		# 		# sent = sock.send(pickle.dumps(temp))
+		# 		if EVIL:
+		# 			self.__message_vector = [random.randint() for _ in range(LEN_OF_BOARD)]
+		# 		sent = sock.send(pickle.dumps(self.__message_vector))
+		# 		data.outb = data.outb[sent:]
+		# 		# assert len(data.outb) == 0
+		# 		self.__message_vector_mutex.acquire()
+		# 		self.__message_vector = [0] * LEN_OF_BOARD
+		# 		self.__message_vector_mutex.release()
+
+	def reply_to_client(self):
+		with self.__clients_mutex:
+			for sock in self.__clients:
 				if EVIL:
 					self.__message_vector = [random.randint() for _ in range(LEN_OF_BOARD)]
-				sent = sock.send(pickle.dumps(self.__message_vector))
-				data.outb = data.outb[sent:]
-				assert len(data.outb) == 0
-				self.__message_vector = [0] * LEN_OF_BOARD
+				sock.sendall(pickle.dumps(self.__message_vector))
+			self.__message_vector = [0] * LEN_OF_BOARD
 
 	def run_server(self):
 		try:
@@ -71,6 +96,10 @@ class Server:
 						self.accept_wrapper(key.fileobj)
 					else:
 						self.service_connection(key, mask)
+					if int(time.time()) % EPOCH == 5:
+						self.reply_to_client()
+
+
 
 		except KeyboardInterrupt:
 			print("caught keyboard interrupt, exiting")

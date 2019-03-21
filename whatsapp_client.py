@@ -53,9 +53,6 @@ class WhatsappClient:
 		num_of_servers = self.__get_num_of_servers()
 		num_of_evil_servers = (num_of_servers - 1) // 3
 		points = ssss_lib.generate_secret_from_msg(self.__msg_str, num_of_evil_servers + 1, num_of_servers)
-		# points = [(1, 0)]
-		# if self.__msg_str != "":
-		# 	points = [(1, int(self.__msg_str))]
 		vector_of_points = []
 		for i in range(LEN_OF_BOARD):
 			vector_of_points.append(
@@ -77,12 +74,6 @@ class WhatsappClient:
 		self.__keep_running = False
 
 	def run_client(self):
-		# ask the user what he would like to do?
-		# a. add new server (should this be automatic?)
-		# b. send an honest msg to the servers
-		# c. read the msgs that sent
-		# d. send empty msg
-		# e. exit the program
 		while self.__keep_running:
 			msg_to_client = "What would you like to do?\n" \
 							"(s)end an honest msg\n" \
@@ -137,7 +128,6 @@ class WhatsappClient:
 
 if __name__ == "__main__":
 	my_client = WhatsappClient([(local_host, i) for i in SERVER_PORTS])
-	# my_client = WhatsappClient([(local_host, 9005)])
 	client_actions_thread = threading.Thread(group=None, target=my_client.run_client, name="client action thread")
 	client_sending_msgs_thread = threading.Thread(group=None, target=my_client.talking_with_server,
 												  name="client sending msgs thread")

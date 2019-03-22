@@ -1,10 +1,10 @@
 PRIME = 2 ** 4423 - 1
 
 MAX_MSG_LEN = 553
-LEN_OF_BOARD = 10
+LEN_OF_BOARD = 50
 SIZE_OF_MSG = 1048576  # = 1024*1024
 
-EPOCH = 30
+EPOCH = 6
 SERVER_PORTS = [i for i in range(9000, 9004)]
 local_host = "127.0.0.1"
 

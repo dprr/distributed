@@ -64,10 +64,10 @@ class WhatsappClient:
 				ssss_lib.generate_secret_from_msg("", num_of_evil_servers + 1, num_of_servers))
 		vector_of_points[random.randint(0, LEN_OF_BOARD - 1)] = points
 		self.__send_to_servers(vector_of_points)
-		if self.__msg_str == "":
-			print("You sent an empty message to the servers in order to maintain anonymity in the group.")
-		else:
+		if self.__msg_str != "":
 			print("your message was sent successfully, you can now prepare a new message.")
+		# else:
+		# 	print("You sent an empty message to the servers in order to maintain anonymity in the group.")
 		self.__msg_mutex.acquire()
 		try:
 			self.__msg_str = ""
@@ -81,7 +81,7 @@ class WhatsappClient:
 		while self.__keep_running:
 			msg_to_client = "What would you like to do?\n" \
 							"(s)end a message\n" \
-							"(r)ead unread msgs that were sent\n" \
+							"(r)ead unread messages that were sent\n" \
 							"(d)ump all messages\n"\
 							"(q)uit\n"
 			action = input(msg_to_client)
@@ -110,7 +110,8 @@ class WhatsappClient:
 			int_msg = max(set(recovered), key=recovered.count)
 			if int_msg != 0:
 				msgs.append(ssss_lib.int_to_str(int_msg))
-		self.__board_history.append(msgs)
+		if len(msgs) != 0:
+			self.__board_history.append(msgs)
 
 	def talking_with_server(self):
 		while self.__keep_running:

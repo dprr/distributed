@@ -8,10 +8,14 @@ import random
 import time
 from threading import Lock
 
-PORT = ""
 
 class Server:
-	def __init__(self, host, port, is_evil = False):
+	"""
+	A server class that receives a share of a message from many clients.
+	Every time a new share is received it adds it to the total share.
+	Once an epoch it sends the total share to all of the clients and resets the total share list.
+	"""
+	def __init__(self, host, port, is_evil=False):
 		self.__evil = is_evil
 		self.selector = selectors.DefaultSelector()
 		self.__message_vector = [0] * LEN_OF_BOARD
@@ -74,7 +78,9 @@ class Server:
 						self.accept_wrapper(key.fileobj)
 					else:
 						self.service_connection(key, mask)
-					if int(time.time()) % EPOCH == 5:
+					# Send the clients the saved messages once an epoch not at the same time that the
+					# client sends its message to the server so that there is no race condition
+					if int(time.time()) % EPOCH == EPOCH // 2:
 						self.reply_to_client()
 						time.sleep(1)
 		except KeyboardInterrupt:
@@ -88,12 +94,11 @@ def start_new_server(_host, _port, _is_evil):
 
 
 if __name__ == '__main__':
-	is_evil = False
+	evil = False
 	if len(sys.argv) < 3:
 		print("usage:", sys.argv[0], "<host> <port>")
 		sys.exit(1)
 	if len(sys.argv) == 4 and sys.argv[3] == "evil":
-		is_evil = True
-	host, port = sys.argv[1], int(sys.argv[2])
-	PORT = port
-	start_new_server(host, port, is_evil)
+		evil = True
+	h, p = sys.argv[1], int(sys.argv[2])
+	start_new_server(h, p, evil)

@@ -1,23 +1,12 @@
-import sched, time
+import time
 import server
 from constants import *
 import random
 import threading
-s = sched.scheduler(time.time, time.sleep)
+
+
 def print_time(a='default'):
 	print("From print_time", time.time(), a)
-
-def print_some_times():
-	print(time.time())
-	s.enter(10, 1, print_time)
-	print("hi")
-	s.enter(5, 2, print_time, argument=('positional',))
-	print("hi")
-	s.enter(5, 1, print_time, kwargs={'a': 'keyword'})
-	print("hi")
-	s.run()
-	print("hi")
-	print(time.time())
 
 
 def run_servers():
@@ -35,6 +24,7 @@ def run_servers():
 	for ser in servers:
 		ser.join()
 
+
 if __name__ == "__main__":
-	# print_some_times()
+	# Example usage
 	run_servers()

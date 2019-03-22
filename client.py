@@ -1,4 +1,3 @@
-import sys
 import socket
 import selectors
 import types
@@ -7,6 +6,9 @@ from threading import Lock
 
 
 class Client:
+    """"
+    A standard client used by whatsapp_client.
+    """
     def __init__(self, host, port):
         self.__received_data_mutex = Lock()
         self.sel = selectors.DefaultSelector()
@@ -64,15 +66,9 @@ class Client:
     def run_client_to_server(self, msg):
         self.data.messages = msg
         try:
-            # while True:
             events = self.sel.select(timeout=1)
             if events:
                 for key, mask in events:
                     self.service_connection(key, mask)
-                # Check for a socket being monitored to continue.
-                # if not self.sel.get_map():
-                #     break
         except KeyboardInterrupt:
             print("caught keyboard interrupt, exiting")
-        # finally:
-        #     self.sel.close()

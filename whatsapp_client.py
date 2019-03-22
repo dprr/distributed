@@ -9,6 +9,11 @@ import pickle
 
 
 class WhatsappClient:
+	""""
+	A client that can send a message once an epoch and read all of the previously sent messages from the group.
+	At any time the user can save a message (overwriting earlier saved messages) and once an epoch it splits the
+	messages into 4 parts and sends them to the four servers.
+	"""
 	def __init__(self, servers_list):
 		self.__msg_read_counter = 0
 		self.__msg_mutex = threading.Lock()
@@ -28,7 +33,7 @@ class WhatsappClient:
 		num = len(self.__servers_list)
 		if num == 1:
 			num = 4
-			warnings.warn("for debug purpose only, can't recover msgs!!!")
+			warnings.warn("For debug purposes only, can't recover messages!!!")
 		return num
 
 	def __send_to_servers(self, vector_of_points):
@@ -41,13 +46,13 @@ class WhatsappClient:
 			cli.run_client_to_server(to_send)
 
 	def __create_msg(self):
-		temp = input("enter your msg: ")
+		temp = input("Enter your message: ")
 		self.__msg_mutex.acquire()
 		try:
 			self.__msg_str = temp
 		finally:
 			self.__msg_mutex.release()
-		print("your msg was saved successfully, you can create new msg but your old msg will be deleted")
+		print("Your message was saved successfully, you can create a new message but your old message will be overwritten.")
 
 	def __send_msg(self):
 		num_of_servers = self.__get_num_of_servers()
@@ -58,12 +63,11 @@ class WhatsappClient:
 			vector_of_points.append(
 				ssss_lib.generate_secret_from_msg("", num_of_evil_servers + 1, num_of_servers))
 		vector_of_points[random.randint(0, LEN_OF_BOARD - 1)] = points
-		# vector_of_points[3] = points
 		self.__send_to_servers(vector_of_points)
 		if self.__msg_str == "":
-			print("you've sent an empty msg to the servers in order to maintain anonymity in the group")
+			print("You sent an empty message to the servers in order to maintain anonymity in the group.")
 		else:
-			print("your msg was sent successfully, you can now send a new msg")
+			print("your message was sent successfully, you can now prepare a new message.")
 		self.__msg_mutex.acquire()
 		try:
 			self.__msg_str = ""
@@ -76,9 +80,9 @@ class WhatsappClient:
 	def run_client(self):
 		while self.__keep_running:
 			msg_to_client = "What would you like to do?\n" \
-							"(s)end an honest msg\n" \
+							"(s)end a message\n" \
 							"(r)ead unread msgs that were sent\n" \
-							"(d)ump all msgs\n"\
+							"(d)ump all messages\n"\
 							"(q)uit\n"
 			action = input(msg_to_client)
 			if action == "s":
@@ -101,7 +105,6 @@ class WhatsappClient:
 		vector_of_points = list(map(list, zip(*board)))
 		msgs = []
 		for shares in vector_of_points:
-			# DOTO - recover secret with evil server
 			result = [[shares[i], shares[j]] for i in range(len(shares)) for j in range(i + 1, len(shares))]
 			recovered = [ssss_lib.recover_secret(i) for i in result]
 			int_msg = max(set(recovered), key=recovered.count)
@@ -111,6 +114,7 @@ class WhatsappClient:
 
 	def talking_with_server(self):
 		while self.__keep_running:
+			# send the server the message once an EPOCH on the EPOCH
 			if int(time.time()) % EPOCH == 0:
 				self.__send_msg()
 				self.__get_msgs()

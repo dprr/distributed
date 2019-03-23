@@ -1,15 +1,15 @@
 # README
 
-## Claim: 
+## Claim 
 This system provides a group chat such that there is anonymity and liveness.
 
-### Assumptions:
+### Assumptions
 * The clients follow the protocol. We assume such because the system creates 
 a closed chat group, and that means that the users will only allow trusted new
 users to join the group.
 * Three servers are follow the protocol and one may be byzantine.
 
-### Normal run of the system:
+### Normal run of the system
 1. There are 4 servers and 1 of them may be byzantine.
 1. Clients connect to the servers, the order of connection 
 to the servers is important.

@@ -24,8 +24,8 @@ will send an empty message.
 1. The client receives either three or four parts of the messages
 from the servers, depending on how the byzantine server acts.
 1. The client recovers the message using a method described later.
-1. Each client has the ability to read previous messages. A message can be read
-that was send between when the client joined until the last epoch was.
+1. Each client has the ability to read previous messages. A message can 
+be read if it was sent after the client joined and before the last epoch.
 1. Each client can quit the group whenever they want.
 
 ### Client sending procedure
@@ -66,11 +66,11 @@ that gets the most votes is removed.
 A malicious server can only knows who is connect to it and nothing more.
 ### Proof
 * Every client sends a message each epoch, 
-so the server can't learn who send the message
+so the server can't learn who send the message.
 * No server has an access to more than 1 point,
  so it cannot learn what is the message.
 * A client send a message each epoch, 
-so the server can't know when a client send a message
+so the server can't know when a client send a message.
 
 ### Claim for liveness
 Regardless as to what the byzantine server does, the system is live.

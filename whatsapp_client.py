@@ -78,7 +78,9 @@ class WhatsappClient:
 		self.__keep_running = False
 
 	def run_client(self):
+		from time import sleep
 		while self.__keep_running:
+			sleep(EPOCH)
 			msg_to_client = "What would you like to do?\n" \
 							"(s)end a message\n" \
 							"(r)ead unread messages that were sent\n" \
@@ -92,6 +94,7 @@ class WhatsappClient:
 			if action == "d":
 				self.read_all_msgs()
 			if action == "q":
+				sleep(EPOCH)
 				self.__stop_running()
 
 	def __get_msgs(self):

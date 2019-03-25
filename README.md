@@ -7,18 +7,18 @@ This system provides a group chat such that there is anonymity and liveness.
 * The clients follow the protocol. We assume such because the system creates 
 a closed chat group, and that means that the users will only allow trusted new
 users to join the group.
-* Three servers are follow the protocol and one may be byzantine.
+* Three servers are following the protocol and one may be byzantine.
 
 ### Normal run of the system
 1. There are 4 servers and 1 of them may be byzantine.
-1. Clients connect to the servers, the order of connection 
+1. Clients connect to the servers. The order of connection 
 to the servers is important.
 1. Every epoch, each client send either one message or no messages to the 
 servers.
     1. If the client has a message to send then the client will send 
-that message
-    1. If the client does not want to send a message, then the client 
-will send an empty message.
+that message.
+    1. If the client does not want to send a message, then an empty
+message will be sent.
 1. A half an epoch later, the clients receive from the servers parts from
 **all** of the messages send during the previous epoch.
 1. The client receives either three or four parts of the messages
@@ -30,15 +30,15 @@ be read if it was sent after the client joined and before the last epoch.
 
 ### Client sending procedure
 1. Decide what message to send. That message can be changed as many times
-as wanted to within the sending time frame.
+as wanted, within the sending time frame.
 1. Convert the message to an integer using hexlify, with the value of the 
 empty message being zero.
 1. Create a list of size LEN_OF_BOARD.
 1. Choose one polynomial of degree one 
-(because there exists at most one byzantine  server) such that f(0) 
+(because there exists at most one byzantine server) such that f(0) 
 is equal to the message and LEN_OF_BOARD - 1 polynomials such that f(0) is 0.
 1. Order the polynomials in a random order.
-1. Create four lists such that list j has f<sub>i</sub>(j) for all i indexes
+1. Create four lists such that list j has f<sub>i</sub>(j) for all i indices
 in the list.
 1. Every epoch on the epoch send list j to server j.
 
@@ -50,9 +50,9 @@ and zero the stored list.
 
 ### Client recovery procedure
 1. Receive 4 or 3 vectors from the server 
-(3 if of the byzantine server sends nothing)
+(3 if of the byzantine server sends nothing).
 1. Organize the list by function 
-(LEN_OF_BOARD list of 4 points and not 4 list of LEN_OF_BOARD points)
+(LEN_OF_BOARD list of 4 points and not 4 list of LEN_OF_BOARD points).
 1. Take lists of 2 points and decide what the real message was by checking
 if when using one of the server's list, the recovered message is different
 then when not using that server's list. And when not using that server's 
@@ -60,7 +60,7 @@ list, all other recovered messages recovered regardless of which 2 lists
 out of the remaining three lists are chosen.
 1. The client sends a vote for which server is the byzantine and the server 
 that gets the most votes is removed.
-1. Ignore the empty messages and save the real messages
+1. Ignore the empty messages and save the real messages.
 
 ### Claim for anonymity
 A malicious server can only knows who is connect to it and nothing more.

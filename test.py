@@ -43,8 +43,3 @@ if __name__ == '__main__':
 		sys.stdin = Tee(input_handle=f, output_handle=sys.stdout)
 		client()
 	sys.stdin = sys.__stdin__
-
-
-# sys.stdin = redirected_input(sys.stdin,
-# s = StringIO.StringIO('Hello, world!')
-# >>> sys.stdin = s ; r = raw_input('What you say?\n') ; sys.stdin = sys.__stdin__

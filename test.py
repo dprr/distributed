@@ -29,10 +29,10 @@ if __name__ == '__main__':
 	input_file = "input.txt"
 	output_file = "output.txt"
 	gen_input(input_file, 50)
-	# if not sys.stdin.isatty():
-	# 	sys.stdin = open(input_file)
-	# 	sys.stdout = open(output_file, "w")
-	# 	client()
-	# 	sys.stdin = sys.__stdin__
-	# 	sys.stdout = sys.__stdout__
+	if not sys.stdin.isatty():
+		sys.stdin = open(input_file)
+		sys.stdout = open(output_file, "w")
+		client()
+		sys.stdin = sys.__stdin__
+		sys.stdout = sys.__stdout__
 	# servers.join(50)

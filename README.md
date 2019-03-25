@@ -58,9 +58,7 @@ if when using one of the server's list, the recovered message is different
 then when not using that server's list. And when not using that server's 
 list, all other recovered messages recovered regardless of which 2 lists
 out of the remaining three lists are chosen.
-1. The client sends a vote for which server is the byzantine and the server 
-that gets the most votes is removed.
-1. Ignore the empty messages and save the real messages.
+1. Ignore the empty messages and save the real messages
 
 ### Claim for anonymity
 A malicious server can only knows who is connect to it and nothing more.

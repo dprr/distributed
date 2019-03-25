@@ -64,11 +64,11 @@ out of the remaining three lists are chosen.
 A malicious server can only knows who is connect to it and nothing more.
 ### Proof
 * Every client sends a message each epoch, 
-so the server can't learn who send the message.
-* No server has an access to more than 1 point,
+so the server can't learn who sent the message.
+* No server has access to more than 1 point,
  so it cannot learn what is the message.
-* A client send a message each epoch, 
-so the server can't know when a client send a message.
+* A client sends a message each epoch (really one or dummy), 
+so the server can't know when a client sent a real message.
 
 ### Claim for liveness
 Regardless as to what the byzantine server does, the system is live.

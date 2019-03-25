@@ -132,7 +132,7 @@ class WhatsappClient:
 			print(self.__board_history[index:])
 
 
-if __name__ == "__main__":
+def main():
 	my_client = WhatsappClient([(local_host, i) for i in SERVER_PORTS])
 	client_actions_thread = threading.Thread(group=None, target=my_client.run_client, name="client action thread")
 	client_sending_msgs_thread = threading.Thread(group=None, target=my_client.talking_with_server,
@@ -143,3 +143,7 @@ if __name__ == "__main__":
 	client_sending_msgs_thread.join()
 	client_actions_thread.join()
 	my_client.close_connection()
+
+
+if __name__ == "__main__":
+	main()

@@ -49,14 +49,14 @@ class WhatsappClient:
 			cli.run_client_to_server(to_send)
 
 	def __create_msg(self):
-		# print("Enter your message: ")
+		print("Enter your message: ")
 		temp = self.__input.readline()[:-1]
 		self.__msg_mutex.acquire()
 		try:
 			self.__msg_str = temp
 		finally:
 			self.__msg_mutex.release()
-		# print("Your message was saved successfully, you can create a new message but your old message will be overwritten.")
+		print("Your message was saved successfully, you can create a new message but your old message will be overwritten.")
 		self.__output.write("Your message was saved successfully, you can create a new message but your old message will be overwritten.\n")
 
 	def __send_msg(self):
@@ -70,7 +70,7 @@ class WhatsappClient:
 		vector_of_points[random.randint(0, LEN_OF_BOARD - 1)] = points
 		self.__send_to_servers(vector_of_points)
 		if self.__msg_str != "":
-			# print("your message was sent successfully, you can now prepare a new message.")
+			print("your message was sent successfully, you can now prepare a new message.")
 			self.__output.write("your message was sent successfully, you can now prepare a new message.\n")
 		# else:
 		# 	print("You sent an empty message to the servers in order to maintain anonymity in the group.")
@@ -93,7 +93,7 @@ class WhatsappClient:
 							"(r)ead unread messages that were sent\n" \
 							"(d)ump all messages\n"\
 							"(q)uit"
-			# print(msg_to_client)
+			print(msg_to_client)
 			action = self.__input.readline()[:-1]
 			if action == "s":
 				self.__create_msg()
@@ -133,7 +133,7 @@ class WhatsappClient:
 				time.sleep(1)
 
 	def read_all_msgs(self):
-		# print(self.__board_history)
+		print(self.__board_history)
 		self.__output.write(str(self.__board_history) + "\n")
 		self.__msg_read_counter = len(self.__board_history)
 
@@ -141,7 +141,7 @@ class WhatsappClient:
 		if len(self.__board_history) != 0:
 			index = self.__msg_read_counter
 			self.__msg_read_counter = len(self.__board_history)
-			# print(self.__board_history[index:])
+			print(self.__board_history[index:])
 			self.__output.write(str(self.__board_history[index:]) + "\n")
 
 

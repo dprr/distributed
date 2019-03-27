@@ -74,4 +74,5 @@ so the server can't know when a client sent a real message.
 Regardless as to what the byzantine server does, the system is live.
 ### Proof
 Every epoch the clients send their messages and every epoch the clients 
-receive at least three parts of their message.
+receive at least three parts of their message. Therefore, there is no stage 
+where liveness can be broken. 

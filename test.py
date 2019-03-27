@@ -4,6 +4,8 @@ from whatsapp_client import main as client
 import sys
 import random
 import string
+from os import remove
+from os.path import isfile
 
 
 def gen_input(output="test.txt", num_lines=5):
@@ -31,21 +33,19 @@ def calc_ratio(input_file, output_file):
 	if len(inpt) == 0:
 		return 0
 
-	print("input: "  + str(inpt))
-	print("output: " + str(outpt))
+	# print("input: "  + str(inpt))
+	# print("output: " + str(outpt))
 	own_output = []
 	for line in outpt:
 		if line in inpt:
 			own_output.append(line)
-	print(outpt)
+	print(own_output)
 
 	# calc ratio
 	ratio = len(own_output) / len(inpt)
-	print(str(len(own_output)) + " out of " + str(len(inpt)))
-	print("ratio: " + str(ratio))
-	# for line in dump:
-	# 	print(line)
-	return ratio
+	# print(str(len(own_output)) + " out of " + str(len(inpt)))
+	# print("ratio: " + str(ratio))
+	return ratio, len(own_output), len(inpt)
 
 
 def get_input_lines(input_file):
@@ -77,6 +77,10 @@ def get_output_lines(output_file):
 
 
 def run_client(input_file="input.txt", output_file="output.txt", num_of_lines=5):
+	if isfile("ratio_file"):
+		remove("ratio_file")
+	ratio_file = open("ratio_file", "a")
+
 	# if sys.stdin.isatty():
 	# 	exit()
 
@@ -88,7 +92,10 @@ def run_client(input_file="input.txt", output_file="output.txt", num_of_lines=5)
 	# client()
 
 	if output_file != sys.__stdout__ and input_file != sys.__stdin__:
-		calc_ratio(input_file, output_file)
+		(ratio, own_output, inpt) = calc_ratio(input_file, output_file)
+		remove(input_file)
+		remove(output_file)
+		ratio_file.write(str([ratio, own_output, inpt]) + "\n")
 
 
 def run_many_clients(num_of_clients=3, num_of_lines=5):
@@ -104,7 +111,7 @@ def run_many_clients(num_of_clients=3, num_of_lines=5):
 
 
 if __name__ == '__main__':
-	run_many_clients(3, 1)
+	run_many_clients(5, 5)
 	# run_client(sys.__stdin__, sys.__stdout__, 5)
 	# run_client(sys.__stdin__, "output.txt", 5)
 	# run_client("input.txt", "output.txt", 5)

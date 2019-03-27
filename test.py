@@ -93,6 +93,11 @@ def get_ratios(ratio_file):
 	return ratio, own_output, inpt
 
 
+def get_misses(ratio_file):
+	ratio, own_output, inpt = get_ratios(ratio_file)
+	return inpt - own_output
+
+
 def run_client(input_file="input.txt", output_file="output.txt", ratio_file="ratio.txt", num_of_lines=5):
 
 	# if sys.stdin.isatty():

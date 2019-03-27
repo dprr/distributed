@@ -27,7 +27,7 @@ def gen_input(output="test.txt", num_lines=5):
 	f.close()
 
 
-def calc_ratio(input_file, output_file):
+def calc_ratio(input_file, output_file, ratio_file):
 	inpt = get_input_lines(input_file)
 	outpt = get_output_lines(output_file)
 	if len(inpt) == 0:
@@ -45,6 +45,9 @@ def calc_ratio(input_file, output_file):
 	ratio = len(own_output) / len(inpt)
 	print(str(len(own_output)) + " out of " + str(len(inpt)))
 	print("ratio: " + str(ratio))
+
+	ratio_file = open(ratio_file, "w")
+	ratio_file.write(str([ratio, len(own_output), len(inpt)]) + "\n")
 	return ratio, len(own_output), len(inpt)
 
 
@@ -76,10 +79,21 @@ def get_output_lines(output_file):
 	return dump
 
 
-def run_client(input_file="input.txt", output_file="output.txt", num_of_lines=5):
-	if isfile("ratio_file"):
-		remove("ratio_file")
-	ratio_file = open("ratio_file", "a")
+def get_ratios(ratio_file):
+	f1 = open(ratio_file, "r")
+	inpt = f1.readline()
+	f1.close()
+	tmp = inpt[:-1]
+	tmp = tmp.replace('[', '')
+	tmp = tmp.replace(']', '')
+	tmp = tmp.split(", ")
+	ratio = float(tmp[0])
+	own_output = int(tmp[1])
+	inpt = int(tmp[2])
+	return ratio, own_output, inpt
+
+
+def run_client(input_file="input.txt", output_file="output.txt", ratio_file="ratio.txt", num_of_lines=5):
 
 	# if sys.stdin.isatty():
 	# 	exit()
@@ -92,17 +106,16 @@ def run_client(input_file="input.txt", output_file="output.txt", num_of_lines=5)
 	# client()
 
 	if output_file != sys.__stdout__ and input_file != sys.__stdin__:
-		(ratio, own_output, inpt) = calc_ratio(input_file, output_file)
+		(ratio, own_output, inpt) = calc_ratio(input_file, output_file, ratio_file)
 		remove(input_file)
 		remove(output_file)
-		ratio_file.write(str([ratio, own_output, inpt]) + "\n")
 
 
 def run_many_clients(num_of_clients=3, num_of_lines=5):
 	clients = []
 	for i in range(num_of_clients):
 		print("start client No. " + str(i) + ":")
-		clients.append(Thread(group=None, target=run_client, args=(["input" + str(i), "output" + str(i), num_of_lines])))
+		clients.append(Thread(group=None, target=run_client, args=(["input" + str(i), "output" + str(i), "ratio" + str(i), num_of_lines])))
 	for cli in clients:
 		cli.start()
 	for cli in clients:
@@ -114,6 +127,7 @@ if __name__ == '__main__':
 	# run_many_clients(5, 10)
 	# run_client(sys.__stdin__, sys.__stdout__, 5)
 	# run_client(sys.__stdin__, "output.txt", 5)
-	run_client("input.txt", "output.txt", 5)
+	# run_client("input.txt", "output.txt", 5)
 	# get_input_lines("input.txt")
 	# calc_ratio("input0", "output0")
+	print(get_ratios("ratio_file"))

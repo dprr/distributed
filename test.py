@@ -125,8 +125,32 @@ def run_client(input_file="input.txt", output_file="output.txt", ratio_file="rat
 		sys.exit()
 
 
-def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt", start_tread=True):
-	if start_tread:
+def collect_data():
+	global LEN_OF_BOARD
+	global EPOCH
+	board_lengths = list(range(5, 50, 1)) + list(range(50, 100, 2)) + list(range(100, 1000, 50))
+	# board_lengths = [50, 100]
+	y = []
+	for i in board_lengths:
+		LEN_OF_BOARD = i
+		z = []
+		for j in range(2, 100):
+			if j < 30:
+				EPOCH = 2
+			elif j < 60:
+				EPOCH = 4
+			elif j < 80:
+				EPOCH = 6
+			elif j < 100:
+				EPOCH = 8
+
+			z.append([run_many_clients(num_of_clients=j, num_of_lines=2, start_thread=False), i, j])
+		y.append(z)
+	return y
+
+
+def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratio.txt", start_thread=True):
+	if start_thread:
 		servers_thread = Thread(group=None, target=run_servers, name="servers thread")
 		servers_thread.start()
 		sleep(10)
@@ -153,27 +177,27 @@ def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt", s
 	ratiosf.write(str(sum_ratios))
 	ratiosf.close()
 	print("clients finished")
-	if start_tread:
+	if start_thread:
 		sys.exit()
-	return sum_ratios[0]
+	return sum_ratios
 
 
 def plot_clients_graph():
-	x = range(2, 10)
-	y = [run_many_clients(i, start_tread=False) for i in x]
+	x = range(2, 256)
+	y = [run_many_clients(i, start_thread=False)[0] for i in x]
 	plt.plot(x, y)
 	plt.xlabel('Number of clients')
 	plt.ylabel('Number of collisions')
 	plt.show()
 
 
-def plot_len_of_board_graph():
+def plot_len_of_board_graph(clients=10):
 	global LEN_OF_BOARD
 	x = list(range(5, 50, 1)) + list(range(50, 100, 2)) + list(range(100, 1000, 50))
 	y = []
 	for i in x:
 		LEN_OF_BOARD = i
-		y.append(run_many_clients(i))
+		y.append(run_many_clients(clients, start_thread=False)[0])
 	LEN_OF_BOARD = 50
 	plt.plot(x, y)
 	plt.xlabel('LEN_OF_BOARD')
@@ -187,4 +211,8 @@ if __name__ == '__main__':
 	# run_client(sys.__stdin__, sys.__stdout__, 5)
 	# get_input_lines("input.txt")
 	# calc_ratio("input0", "output0")
-	plot_clients_graph()
+	results = str(collect_data())
+	print(results)
+	f1 = open("results.txt", "w")
+	f1.write(results)
+	f1.close()

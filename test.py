@@ -32,7 +32,7 @@ def gen_input(output="test.txt", num_lines=5):
 
 def calc_ratio(input_file, output_file, ratio_file):
 	inpt = get_input_lines(input_file)
-	outpt, fails = get_output_lines(output_file)
+	outpt, collisions = get_output_lines(output_file)
 	if len(inpt) == 0:
 		return 0
 
@@ -47,8 +47,8 @@ def calc_ratio(input_file, output_file, ratio_file):
 	print("ratio: " + str(ratio))
 
 	ratio_file = open(ratio_file, "w")
-	ratio_file.write(str([ratio, len(own_output), len(inpt), fails]) + "\n")
-	return ratio, len(own_output), len(inpt), fails
+	ratio_file.write(str([ratio, len(own_output), len(inpt), collisions]) + "\n")
+	return ratio, len(own_output), len(inpt), collisions
 
 
 def get_input_lines(input_file):
@@ -70,14 +70,14 @@ def get_output_lines(output_file):
 	f1.close()
 
 	# parse dump
-	fails = dump.count('Not ciphertext of utf-8')
+	collisions = dump.count('Not ciphertext of utf-8')
 	dump = dump[:-1]
 	dump = dump.replace(' ', '')
 	dump = dump.replace('[', '')
 	dump = dump.replace(']', '')
 	dump = dump.replace('\'', '')
 	dump = dump.split(",")
-	return dump, fails
+	return dump, collisions
 
 
 def get_ratios(ratio_file):
@@ -91,12 +91,12 @@ def get_ratios(ratio_file):
 	ratio = float(tmp[0])
 	own_output = int(tmp[1])
 	inpt = int(tmp[2])
-	fails = int(tmp[3])
-	return ratio, own_output, inpt, fails
+	collisions = int(tmp[3])
+	return ratio, own_output, inpt, collisions
 
 
 def get_misses(ratio_file):
-	ratio, own_output, inpt, fails = get_ratios(ratio_file)
+	ratio, own_output, inpt, collisions = get_ratios(ratio_file)
 	return inpt - own_output
 
 
@@ -146,7 +146,7 @@ def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt", s
 		remove("ratio" + str(i))
 		ratios.append(temp)
 		sum_ratios = (sum_ratios[0] + temp[1], sum_ratios[1] + temp[2])
-	sum_ratios = (sum_ratios[0] / sum_ratios[1], sum_ratios[0], sum_ratios[1], ratios[0][3])
+	sum_ratios = (sum_ratios[0] / sum_ratios[1], sum_ratios[0], sum_ratios[1], ratios[0][3], num_of_clients)
 	print(ratios)
 	print(sum_ratios)
 	ratiosf = open(ratio_file, "w")
@@ -159,9 +159,9 @@ def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt", s
 
 
 def plot_clients_graph():
-	x = range(2, 256)
-	y = [run_many_clients(i) for i in x]
-	plt.plot(x,y)
+	x = range(2, 10)
+	y = [run_many_clients(i, start_tread=False) for i in x]
+	plt.plot(x, y)
 	plt.xlabel('Number of clients')
 	plt.ylabel('Number of collisions')
 	plt.show()
@@ -182,8 +182,9 @@ def plot_len_of_board_graph():
 
 
 if __name__ == '__main__':
-	print(run_many_clients(15, 10))
+	# print(run_many_clients(15, 10))
 	# run_client(num_of_lines=15)
 	# run_client(sys.__stdin__, sys.__stdout__, 5)
 	# get_input_lines("input.txt")
 	# calc_ratio("input0", "output0")
+	plot_clients_graph()

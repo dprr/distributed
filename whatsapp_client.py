@@ -56,7 +56,6 @@ class WhatsappClient:
 			self.__msg_str = temp
 		finally:
 			self.__msg_mutex.release()
-		print("Your message was saved successfully, you can create a new message but your old message will be overwritten.")
 		self.__output.write("Your message was saved successfully, you can create a new message but your old message will be overwritten.\n")
 
 	def __send_msg(self):
@@ -70,10 +69,8 @@ class WhatsappClient:
 		vector_of_points[random.randint(0, LEN_OF_BOARD - 1)] = points
 		self.__send_to_servers(vector_of_points)
 		if self.__msg_str != "":
-			print("your message was sent successfully, you can now prepare a new message.")
 			self.__output.write("your message was sent successfully, you can now prepare a new message.\n")
 		# else:
-		# 	print("You sent an empty message to the servers in order to maintain anonymity in the group.")
 		# 	self.__output.write("You sent an empty message to the servers in order to maintain anonymity in the group.\n")
 		self.__msg_mutex.acquire()
 		try:

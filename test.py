@@ -25,20 +25,21 @@ def gen_input(output="test.txt", num_lines=5):
 	f.close()
 
 
-def calc_ratio(init_num_of_lines, output_file):
-	# get last dump
-	f1 = open(output_file, "r")
-	dump = f1.readlines()[-1]
-	f1.close()
+def calc_ratio(input_file, output_file):
+	inpt = get_input_lines(input_file)
+	outpt = get_output_lines(output_file)
 
-	# parse dump
-	dump = dump.split("\'], [\'")
-	dump[0] = dump[0][3:]
-	dump[len(dump) - 1] = dump[len(dump) - 1][:-4]
+	print(inpt)
+	print(outpt)
+	own_output = []
+	for line in outpt:
+		if line in inpt:
+			own_output.append(line)
+	print(outpt)
 
 	# calc ratio
-	ratio = len(dump) / init_num_of_lines
-	print(str(len(dump)) + " of " + str(init_num_of_lines))
+	ratio = len(outpt) / len(inpt)
+	print(str(len(outpt)) + " of " + str(len(inpt)))
 	print("ratio: " + str(ratio))
 	# for line in dump:
 	# 	print(line)
@@ -55,6 +56,22 @@ def get_input_lines(input_file):
 			messages.append(inpt[i+1][:-1])
 			i += 2
 	return messages
+
+
+def get_output_lines(output_file):
+	# get last dump
+	f1 = open(output_file, "r")
+	dump = f1.readlines()[-1]
+	f1.close()
+
+	# parse dump
+	dump = dump[:-1]
+	dump = dump.replace(' ', '')
+	dump = dump.replace('[', '')
+	dump = dump.replace(']', '')
+	dump = dump.replace('\'', '')
+	dump = dump.split(",")
+	return dump
 
 
 def run_client(input_file="input.txt", output_file="output.txt", num_of_lines=5):
@@ -85,8 +102,9 @@ def run_many_clients(num_of_clients=3, num_of_lines=5):
 
 
 if __name__ == '__main__':
-	run_many_clients(4)
+	run_many_clients(4, 10)
 	# run_client(sys.__stdin__, sys.__stdout__)
 	# run_client(sys.__stdin__, "output.txt")
 	# run_client("input.txt", "output.txt")
 	# get_input_lines("input.txt")
+	# calc_ratio("input0", "output0")

@@ -125,11 +125,17 @@ def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt"):
 	sum_ratios = [0, 0]
 	for i in range(num_of_clients):
 		temp = get_ratios("ratio" + str(i))
+		remove("ratio" + str(i))
 		ratios.append(temp)
 		sum_ratios = (sum_ratios[0] + temp[1], sum_ratios[1] + temp[2])
+	sum_ratios = (sum_ratios[0] / sum_ratios[1], sum_ratios[0], sum_ratios[1])
 	print(ratios)
 	print(sum_ratios)
+	ratiosf = open(ratio_file, "w")
+	ratiosf.write(str(sum_ratios))
+	ratiosf.close()
 	print("clients finished")
+	return sum_ratios
 
 
 def plot_clients_graph():

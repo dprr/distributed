@@ -6,6 +6,7 @@ import threading
 from constants import *
 import time
 import pickle
+import sys
 
 
 class WhatsappClient:
@@ -14,7 +15,7 @@ class WhatsappClient:
 	At any time the user can save a message (overwriting earlier saved messages) and once an epoch it splits the
 	messages into 4 parts and sends them to the four servers.
 	"""
-	def __init__(self, servers_list):
+	def __init__(self, servers_list, inputf=sys.__stdin__, outputf=sys.__stdout__):
 		self.__msg_read_counter = 0
 		self.__msg_mutex = threading.Lock()
 		self.__servers_list = servers_list
@@ -22,6 +23,8 @@ class WhatsappClient:
 		self.__msg_str = ""
 		self.__keep_running = True
 		self.__board_history = []
+		self.__input = inputf
+		self.__output = outputf
 		for i in range(len(servers_list)):
 			self.__clients.append(client.Client(servers_list[i][0], servers_list[i][1]))
 
@@ -46,13 +49,15 @@ class WhatsappClient:
 			cli.run_client_to_server(to_send)
 
 	def __create_msg(self):
-		temp = input("Enter your message: ")
+		print("Enter your message: ")
+		temp = self.__input.readline()[:-1]
 		self.__msg_mutex.acquire()
 		try:
 			self.__msg_str = temp
 		finally:
 			self.__msg_mutex.release()
 		print("Your message was saved successfully, you can create a new message but your old message will be overwritten.")
+		self.__output.write("Your message was saved successfully, you can create a new message but your old message will be overwritten.\n")
 
 	def __send_msg(self):
 		num_of_servers = self.__get_num_of_servers()
@@ -66,8 +71,10 @@ class WhatsappClient:
 		self.__send_to_servers(vector_of_points)
 		if self.__msg_str != "":
 			print("your message was sent successfully, you can now prepare a new message.")
+			self.__output.write("your message was sent successfully, you can now prepare a new message.\n")
 		# else:
 		# 	print("You sent an empty message to the servers in order to maintain anonymity in the group.")
+		# 	self.__output.write("You sent an empty message to the servers in order to maintain anonymity in the group.\n")
 		self.__msg_mutex.acquire()
 		try:
 			self.__msg_str = ""
@@ -85,8 +92,9 @@ class WhatsappClient:
 							"(s)end a message\n" \
 							"(r)ead unread messages that were sent\n" \
 							"(d)ump all messages\n"\
-							"(q)uit\n"
-			action = input(msg_to_client)
+							"(q)uit"
+			print(msg_to_client)
+			action = self.__input.readline()[:-1]
 			if action == "s":
 				self.__create_msg()
 			if action == "r":
@@ -126,6 +134,7 @@ class WhatsappClient:
 
 	def read_all_msgs(self):
 		print(self.__board_history)
+		self.__output.write(str(self.__board_history) + "\n")
 		self.__msg_read_counter = len(self.__board_history)
 
 	def read_last_msgs(self):
@@ -133,10 +142,16 @@ class WhatsappClient:
 			index = self.__msg_read_counter
 			self.__msg_read_counter = len(self.__board_history)
 			print(self.__board_history[index:])
+			self.__output.write(str(self.__board_history[index:]) + "\n")
 
 
-def main():
-	my_client = WhatsappClient([(local_host, i) for i in SERVER_PORTS])
+def main(inputf=sys.__stdin__, outputf=sys.__stdout__):
+	if inputf != sys.__stdin__ and inputf != sys.stdin:
+		inputf = open(inputf, "r")
+	print(inputf)
+	if outputf != sys.__stdout__ and inputf != sys.stdout:
+		outputf = open(outputf, "w")
+	my_client = WhatsappClient([(local_host, i) for i in SERVER_PORTS], inputf, outputf)
 	client_actions_thread = threading.Thread(group=None, target=my_client.run_client, name="client action thread")
 	client_sending_msgs_thread = threading.Thread(group=None, target=my_client.talking_with_server,
 												  name="client sending msgs thread")

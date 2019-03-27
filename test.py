@@ -144,7 +144,7 @@ def collect_data():
 			elif j < 100:
 				EPOCH = 8
 
-			z.append([run_many_clients(num_of_clients=j, num_of_lines=2, start_thread=False), i, j])
+			z.append([run_many_clients(num_of_clients=j, num_of_lines=100, start_thread=False), i, j])
 		y.append(z)
 	return y
 

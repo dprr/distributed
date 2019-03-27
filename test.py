@@ -1,11 +1,12 @@
+from main import run_servers
 from whatsapp_client import main as client
-from threading import Thread
+from threading import Thread, Event
 import matplotlib.pyplot as plt
 import sys
 import random
 import string
 from os import remove
-from os.path import isfile
+from time import sleep
 
 
 def gen_input(output="test.txt", num_lines=5):
@@ -98,7 +99,11 @@ def get_misses(ratio_file):
 	return inpt - own_output
 
 
-def run_client(input_file="input.txt", output_file="output.txt", ratio_file="ratio.txt", num_of_lines=5):
+def run_client(input_file="input.txt", output_file="output.txt", ratio_file="ratio.txt", num_of_lines=5, start_tread=True):
+	if start_tread:
+		servers_thread = Thread(group=None, target=run_servers, name="servers thread")
+		servers_thread.start()
+		sleep(10)
 
 	# if sys.stdin.isatty():
 	# 	exit()
@@ -107,20 +112,27 @@ def run_client(input_file="input.txt", output_file="output.txt", ratio_file="rat
 	if input_file != sys.__stdin__:
 		gen_input(input_file, num_of_lines)
 
+	# run client
 	client(input_file, output_file)
-	# client()
 
 	if output_file != sys.__stdout__ and input_file != sys.__stdin__:
 		calc_ratio(input_file, output_file, ratio_file)
 		remove(input_file)
 		remove(output_file)
 
+	if start_tread:
+		sys.exit()
 
-def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt"):
+
+def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt", start_tread=True):
+	if start_tread:
+		servers_thread = Thread(group=None, target=run_servers, name="servers thread")
+		servers_thread.start()
+		sleep(10)
 	clients = []
 	for i in range(num_of_clients):
 		print("start client No. " + str(i) + ":")
-		clients.append(Thread(group=None, target=run_client, args=(["input" + str(i), "output" + str(i), "ratio" + str(i), num_of_lines])))
+		clients.append(Thread(group=None, target=run_client, args=(["input" + str(i), "output" + str(i), "ratio" + str(i), num_of_lines, False])))
 	for cli in clients:
 		cli.start()
 	for cli in clients:
@@ -140,6 +152,8 @@ def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt"):
 	ratiosf.write(str(sum_ratios))
 	ratiosf.close()
 	print("clients finished")
+	if start_tread:
+		sys.exit()
 	return sum_ratios
 
 
@@ -164,10 +178,10 @@ def plot_len_of_board_graph():
 
 
 if __name__ == '__main__':
-	run_many_clients(5, 10)
+	# print(run_many_clients(5, 10))
 	# run_client(sys.__stdin__, sys.__stdout__, 5)
 	# run_client(sys.__stdin__, "output.txt", 5)
-	# run_client("input.txt", "output.txt", 5)
+	run_client(num_of_lines=15)
 	# get_input_lines("input.txt")
 	# calc_ratio("input0", "output0")
 	# print(get_ratios("ratio_file"))

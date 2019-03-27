@@ -156,11 +156,11 @@ def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt", s
 	print("clients finished")
 	if start_tread:
 		sys.exit()
-	return sum_ratios[2] - sum_ratios[1]
+	return sum_ratios[0]
 
 
 def plot_clients_graph():
-	x = range(1, 1000)
+	x = range(2, 256)
 	y = [run_many_clients(i) for i in x]
 	plt.plot(x,y)
 	plt.xlabel('Number of clients')

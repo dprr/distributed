@@ -146,7 +146,7 @@ def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt", s
 		remove("ratio" + str(i))
 		ratios.append(temp)
 		sum_ratios = (sum_ratios[0] + temp[1], sum_ratios[1] + temp[2])
-	sum_ratios = (sum_ratios[0] / sum_ratios[1], sum_ratios[0], sum_ratios[1], ratios[0])
+	sum_ratios = (sum_ratios[0] / sum_ratios[1], sum_ratios[0], sum_ratios[1], ratios[0][3])
 	print(ratios)
 	print(sum_ratios)
 	ratiosf = open(ratio_file, "w")

@@ -106,12 +106,12 @@ def run_client(input_file="input.txt", output_file="output.txt", ratio_file="rat
 	# client()
 
 	if output_file != sys.__stdout__ and input_file != sys.__stdin__:
-		(ratio, own_output, inpt) = calc_ratio(input_file, output_file, ratio_file)
+		calc_ratio(input_file, output_file, ratio_file)
 		remove(input_file)
 		remove(output_file)
 
 
-def run_many_clients(num_of_clients=3, num_of_lines=5):
+def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt"):
 	clients = []
 	for i in range(num_of_clients):
 		print("start client No. " + str(i) + ":")
@@ -120,10 +120,20 @@ def run_many_clients(num_of_clients=3, num_of_lines=5):
 		cli.start()
 	for cli in clients:
 		cli.join()
+
+	ratios = []
+	sum_ratios = [0, 0]
+	for i in range(num_of_clients):
+		temp = get_ratios("ratio" + str(i))
+		ratios.append(temp)
+		sum_ratios = (sum_ratios[0] + temp[1], sum_ratios[1] + temp[2])
+	print(ratios)
+	print(sum_ratios)
 	print("clients finished")
 
+
 def plot_clients_graph():
-	x = range(1,1000)
+	x = range(1, 1000)
 	# TODO: change to number of collisions
 	y = [run_many_clients(i) for i in x]
 	plt.plot(x,y)
@@ -131,8 +141,9 @@ def plot_clients_graph():
 	plt.ylabel('Number of collisions')
 	plt.show()
 
+
 def plot_len_of_board_graph():
-	x = range(1,1000)
+	x = range(1, 1000)
 	# TODO: change to number of collisions
 	y = [i for i in x]
 	plt.plot(x,y)
@@ -140,11 +151,12 @@ def plot_len_of_board_graph():
 	plt.ylabel('Number of collisions')
 	plt.show()
 
+
 if __name__ == '__main__':
-	# run_many_clients(5, 10)
+	run_many_clients(5, 10)
 	# run_client(sys.__stdin__, sys.__stdout__, 5)
 	# run_client(sys.__stdin__, "output.txt", 5)
 	# run_client("input.txt", "output.txt", 5)
 	# get_input_lines("input.txt")
 	# calc_ratio("input0", "output0")
-	print(get_ratios("ratio_file"))
+	# print(get_ratios("ratio_file"))

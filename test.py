@@ -25,42 +25,58 @@ def gen_input(output="test.txt", num_lines=5):
 	f.close()
 
 
-def run_client(input_file="input.txt", output_file="output.txt"):
+def calc_ratio(init_num_of_lines, output_file):
+	# get last dump
+	f1 = open(output_file, "r")
+	dump = f1.readlines()[-1]
+	f1.close()
+
+	# parse dump
+	dump = dump.split("\'], [\'")
+	dump[0] = dump[0][3:]
+	dump[len(dump) - 1] = dump[len(dump) - 1][:-4]
+
+	# calc ratio
+	ratio = len(dump) / init_num_of_lines
+	print(str(len(dump)) + " of " + str(init_num_of_lines))
+	print("ratio: " + str(ratio))
+	# for line in dump:
+	# 	print(line)
+	return ratio
+
+
+def get_input_lines(input_file):
+	f1 = open(input_file, "r")
+	inpt = f1.readlines()
+	f1.close()
+	messages = []
+	for i in range(len(inpt)):
+		if inpt[i][:-1] == "s":
+			messages.append(inpt[i+1][:-1])
+			i += 2
+	return messages
+
+
+def run_client(input_file="input.txt", output_file="output.txt", num_of_lines=5):
 	# if sys.stdin.isatty():
 	# 	exit()
-	print(output_file)
-	num_of_lines = 5
+
+	# generate input
 	if input_file != sys.__stdin__:
 		gen_input(input_file, num_of_lines)
-		sys.stdin = open(input_file)
-	# if output_file != sys.__stdout__:
-	# 	sys.stdout = open(output_file, "w")
 
 	client(input_file, output_file)
 	# client()
 
-	sys.stdin = sys.__stdin__
-	# sys.stdout = sys.__stdout__
-
-	if output_file != sys.__stdout__:
-		f1 = open(output_file, "r")
-		last_line = f1.readlines()[-1]
-		f1.close()
-		x = last_line.count(", ") + 1
-		print(str(x) + " of " + str(num_of_lines))
-		print("ratio: " + str(x / num_of_lines))
-		last_line = last_line.split("\'], [\'")
-		last_line[0] = last_line[0][3:]
-		last_line[len(last_line) - 1] = last_line[len(last_line) - 1][:-4]
-		# for line in last_line:
-		# 	print(line)
+	if output_file != sys.__stdout__ and input_file != sys.__stdin__:
+		calc_ratio(num_of_lines, output_file)
 
 
-def run_many_clients(num_of_clients=3):
+def run_many_clients(num_of_clients=3, num_of_lines=5):
 	clients = []
 	for i in range(num_of_clients):
 		print("start client No. " + str(i) + ":")
-		clients.append(Thread(group=None, target=run_client, args=(["input" + str(i), "output" + str(i)])))
+		clients.append(Thread(group=None, target=run_client, args=(["input" + str(i), "output" + str(i), num_of_lines])))
 	for cli in clients:
 		cli.start()
 	for cli in clients:
@@ -69,23 +85,8 @@ def run_many_clients(num_of_clients=3):
 
 
 if __name__ == '__main__':
-	# run_many_clients(1)
-	# f1 = open("aa1", "w")
-	# f2 = open("aa2", "w")
-	# f3 = open("aa3", "w")
-	# f4 = open("aa4", "w")
-	# f1.write("aaa\n")
-	# print("hi aaa ", file=f1)
-	# print("hi hi ", file=f2)
-	# print("hi hi ", file=f3)
-	# print("hi hi ", file=f4)
-	# sys.stdout.write("bbb")
+	run_many_clients(4)
 	# run_client(sys.__stdin__, sys.__stdout__)
 	# run_client(sys.__stdin__, "output.txt")
-	run_client("input.txt", "output.txt")
-	# print(sys.__stdin__.readline())
-	# f1 = open("aa1", "r")
-	# print(f1.readline())
-	# a = "dshg\n"
-	# print(a[:-1])
-	# print(a)
+	# run_client("input.txt", "output.txt")
+	# get_input_lines("input.txt")

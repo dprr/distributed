@@ -46,7 +46,7 @@ class Server:
 			try:
 				recv_data = sock.recv(SIZE_OF_MSG)  # Should be ready to read
 			except ConnectionResetError:
-				exit(0)
+				pass
 			if recv_data:
 				data.outb = recv_data
 				received_data = pickle.loads(data.outb)

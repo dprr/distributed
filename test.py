@@ -5,8 +5,10 @@ import sys
 import random
 import string
 from os import remove
+from constants import *
 from os.path import isfile
 
+global LEN_OF_BOARD
 
 def gen_input(output="test.txt", num_lines=5):
 	f = open(output, "w")
@@ -140,23 +142,24 @@ def run_many_clients(num_of_clients=3, num_of_lines=5, ratio_file="ratio.txt"):
 	ratiosf.write(str(sum_ratios))
 	ratiosf.close()
 	print("clients finished")
-	return sum_ratios
+	return sum_ratios[2] - sum_ratios[1]
 
 
 def plot_clients_graph():
 	x = range(1, 1000)
-	# TODO: change to number of collisions
 	y = [run_many_clients(i) for i in x]
 	plt.plot(x,y)
 	plt.xlabel('Number of clients')
 	plt.ylabel('Number of collisions')
 	plt.show()
 
-
 def plot_len_of_board_graph():
-	x = range(1, 1000)
-	# TODO: change to number of collisions
-	y = [i for i in x]
+	x = list(range(5, 50 ,1)) + list(range(50,100,2)) + list(range(100,1000,50))
+	y = []
+	for i in x:
+		LEN_OF_BOARD = i
+		y.append(run_many_clients(i))
+	LEN_OF_BOARD = 50
 	plt.plot(x,y)
 	plt.xlabel('LEN_OF_BOARD')
 	plt.ylabel('Number of collisions')

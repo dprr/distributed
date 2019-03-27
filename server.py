@@ -80,9 +80,9 @@ class Server:
 						self.service_connection(key, mask)
 					# Send the clients the saved messages once an epoch not at the same time that the
 					# client sends its message to the server so that there is no race condition
-					if int(time.time()) % EPOCH == EPOCH // 2:
-						self.reply_to_client()
-						time.sleep(1)
+				if int(time.time()) % EPOCH == EPOCH // 2:
+					self.reply_to_client()
+					time.sleep(1)
 		except KeyboardInterrupt:
 			print("caught keyboard interrupt, exiting")
 		finally:

@@ -39,12 +39,12 @@ def calc_ratio(input_file, output_file):
 	for line in outpt:
 		if line in inpt:
 			own_output.append(line)
-	print(own_output)
+	# print(own_output)
 
 	# calc ratio
 	ratio = len(own_output) / len(inpt)
-	# print(str(len(own_output)) + " out of " + str(len(inpt)))
-	# print("ratio: " + str(ratio))
+	print(str(len(own_output)) + " out of " + str(len(inpt)))
+	print("ratio: " + str(ratio))
 	return ratio, len(own_output), len(inpt)
 
 
@@ -111,9 +111,9 @@ def run_many_clients(num_of_clients=3, num_of_lines=5):
 
 
 if __name__ == '__main__':
-	run_many_clients(5, 5)
+	# run_many_clients(5, 10)
 	# run_client(sys.__stdin__, sys.__stdout__, 5)
 	# run_client(sys.__stdin__, "output.txt", 5)
-	# run_client("input.txt", "output.txt", 5)
+	run_client("input.txt", "output.txt", 5)
 	# get_input_lines("input.txt")
 	# calc_ratio("input0", "output0")

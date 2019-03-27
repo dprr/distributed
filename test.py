@@ -24,7 +24,7 @@ def gen_input(output="test.txt", num_lines=5):
 	f.close()
 
 
-if __name__ == '__main__':
+def run_client():
 	# servers = Thread(target=mn.run_servers())
 	# servers.start()
 	if sys.stdin.isatty():
@@ -54,3 +54,8 @@ if __name__ == '__main__':
 	for line in last_line:
 		print(line)
 	# servers.join(50)
+
+
+if __name__ == '__main__':
+	run_client()
+

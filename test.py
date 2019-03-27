@@ -1,6 +1,6 @@
-# import main as mn
-from threading import Thread
 from whatsapp_client import main as client
+from threading import Thread
+import matplotlib.pyplot as plt
 import sys
 import random
 import string
@@ -122,6 +122,23 @@ def run_many_clients(num_of_clients=3, num_of_lines=5):
 		cli.join()
 	print("clients finished")
 
+def plot_clients_graph():
+	x = range(1,1000)
+	# TODO: change to number of collisions
+	y = [run_many_clients(i) for i in x]
+	plt.plot(x,y)
+	plt.xlabel('Number of clients')
+	plt.ylabel('Number of collisions')
+	plt.show()
+
+def plot_len_of_board_graph():
+	x = range(1,1000)
+	# TODO: change to number of collisions
+	y = [i for i in x]
+	plt.plot(x,y)
+	plt.xlabel('LEN_OF_BOARD')
+	plt.ylabel('Number of collisions')
+	plt.show()
 
 if __name__ == '__main__':
 	# run_many_clients(5, 10)

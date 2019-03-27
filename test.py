@@ -8,7 +8,6 @@ from os import remove
 from constants import *
 from os.path import isfile
 
-global LEN_OF_BOARD
 
 def gen_input(output="test.txt", num_lines=5):
 	f = open(output, "w")
@@ -154,6 +153,7 @@ def plot_clients_graph():
 	plt.show()
 
 def plot_len_of_board_graph():
+	global LEN_OF_BOARD
 	x = list(range(5, 50 ,1)) + list(range(50,100,2)) + list(range(100,1000,50))
 	y = []
 	for i in x:

@@ -142,20 +142,21 @@ def collect_data():
 				EPOCH = 6
 			elif j < 100:
 				EPOCH = 8
-
-			y.append([run_many_clients(num_of_clients=j, num_of_lines=100, start_thread=False), i, j])
+			outpt = run_many_clients(num_of_clients=j, num_of_lines=100, start_thread=False) + tuple([i])
+			y.append(outpt)
 	return y
 
 
-def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratio.txt", start_thread=True):
+def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratios.txt", start_thread=True):
 	if start_thread:
-		servers_thread = Thread(group=None, target=run_servers, name="servers thread")
+		servers_thread = Thread(target=run_servers)
 		servers_thread.start()
 		sleep(10)
 	clients = []
 	for i in range(num_of_clients):
 		print("start client No. " + str(i) + ":")
-		clients.append(Thread(group=None, target=run_client, args=(["input" + str(i), "output" + str(i), "ratio" + str(i), num_of_lines, False])))
+		clients.append(Thread(target=run_client,
+							  args=(["input" + str(i), "output" + str(i), "ratio" + str(i), num_of_lines, False])))
 	for cli in clients:
 		cli.start()
 	for cli in clients:
@@ -171,8 +172,8 @@ def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratio.txt", 
 	sum_ratios = (sum_ratios[0] / sum_ratios[1], sum_ratios[0], sum_ratios[1], ratios[0][3], num_of_clients)
 	print(ratios)
 	print(sum_ratios)
-	ratiosf = open(ratio_file, "w")
-	ratiosf.write(str(sum_ratios))
+	ratiosf = open(ratio_file, "a")
+	ratiosf.write(str(sum_ratios) + "\n")
 	ratiosf.close()
 	print("clients finished")
 	if start_thread:

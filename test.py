@@ -185,7 +185,7 @@ def plot_clients_graph():
 	y = [run_many_clients(i, start_thread=False)[0] for i in x]
 	plt.plot(x, y)
 	plt.xlabel('Number of clients')
-	plt.ylabel('Number of collisions')
+	plt.ylabel('Percentage of collisions')
 	plt.show()
 
 
@@ -199,7 +199,7 @@ def plot_len_of_board_graph(clients=10):
 	LEN_OF_BOARD = 50
 	plt.plot(x, y)
 	plt.xlabel('LEN_OF_BOARD')
-	plt.ylabel('Number of collisions')
+	plt.ylabel('Percentage of collisions')
 	plt.show()
 
 

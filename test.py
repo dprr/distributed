@@ -41,14 +41,10 @@ def calc_ratio(input_file, output_file, ratio_file):
 		if line in inpt:
 			own_output.append(line)
 
-	# calc ratio
-	ratio = len(own_output) / len(inpt)
-	print(str(len(own_output)) + " out of " + str(len(inpt)))
-	print("ratio: " + str(ratio))
-
+	ratio_set = [len(inpt), len(own_output), collisions]
 	ratio_file = open(ratio_file, "w")
-	ratio_file.write(str([ratio, len(own_output), len(inpt), collisions]) + "\n")
-	return ratio, len(own_output), len(inpt), collisions
+	ratio_file.write(str(ratio_set) + "\n")
+	return ratio_set
 
 
 def get_input_lines(input_file):
@@ -88,15 +84,14 @@ def get_ratios(ratio_file):
 	tmp = tmp.replace('[', '')
 	tmp = tmp.replace(']', '')
 	tmp = tmp.split(", ")
-	ratio = float(tmp[0])
+	inpt = int(tmp[0])
 	own_output = int(tmp[1])
-	inpt = int(tmp[2])
-	collisions = int(tmp[3])
-	return ratio, own_output, inpt, collisions
+	collisions = int(tmp[2])
+	return inpt, own_output, collisions
 
 
 def get_misses(ratio_file):
-	ratio, own_output, inpt, collisions = get_ratios(ratio_file)
+	inpt, own_output, collisions = get_ratios(ratio_file)
 	return inpt - own_output
 
 
@@ -133,11 +128,14 @@ def collect_data(start_thread=True):
 	global LEN_OF_BOARD
 	global EPOCH
 	board_lengths = list(range(5, 50, 1)) + list(range(50, 100, 2)) + list(range(100, 1000, 50))
+	users_num = list(range(2, 100, 1)) + list(range(100, 150, 10)) + list(range(150, 256, 50))
 	# board_lengths = [50, 100]
 	y = []
 	for i in board_lengths:
 		LEN_OF_BOARD = i
-		for j in range(2, 100):
+		for j in users_num:
+			if j > i:
+				break
 			if j < 30:
 				EPOCH = 2
 			elif j < 60:
@@ -146,7 +144,7 @@ def collect_data(start_thread=True):
 				EPOCH = 6
 			elif j < 100:
 				EPOCH = 8
-			outpt = run_many_clients(num_of_clients=j, num_of_lines=100, start_thread=False) + tuple([i])
+			outpt = tuple(run_many_clients(num_of_clients=j, num_of_lines=5, start_thread=False)) + tuple([i])
 			y.append(outpt)
 	if start_thread:
 		sys.exit()
@@ -175,7 +173,7 @@ def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratios.txt",
 		remove("ratio" + str(i))
 		ratios.append(temp)
 		sum_ratios = (sum_ratios[0] + temp[1], sum_ratios[1] + temp[2])
-	sum_ratios = (sum_ratios[0] / sum_ratios[1], sum_ratios[0], sum_ratios[1], ratios[0][3], num_of_clients)
+	sum_ratios = (sum_ratios[0] / sum_ratios[1], sum_ratios[0], sum_ratios[1], ratios[0][3], num_of_clients, LEN_OF_BOARD)
 	print(ratios)
 	print(sum_ratios)
 	ratiosf = open(ratio_file, "a")
@@ -213,9 +211,6 @@ def plot_len_of_board_graph(clients=10):
 if __name__ == '__main__':
 	# print(run_many_clients(15, 10))
 	# run_client(num_of_lines=15)
-	# run_client(sys.__stdin__, sys.__stdout__, 5)
-	# get_input_lines("input.txt")
-	# calc_ratio("input0", "output0")
 	results = str(collect_data(start_thread=False))
 	print(results)
 	f1 = open("results.txt", "a")

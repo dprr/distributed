@@ -125,7 +125,11 @@ def run_client(input_file="input.txt", output_file="output.txt", ratio_file="rat
 		sys.exit()
 
 
-def collect_data():
+def collect_data(start_thread=True):
+	if start_thread:
+		servers_thread = Thread(target=run_servers)
+		servers_thread.start()
+		sleep(10)
 	global LEN_OF_BOARD
 	global EPOCH
 	board_lengths = list(range(5, 50, 1)) + list(range(50, 100, 2)) + list(range(100, 1000, 50))
@@ -144,6 +148,8 @@ def collect_data():
 				EPOCH = 8
 			outpt = run_many_clients(num_of_clients=j, num_of_lines=100, start_thread=False) + tuple([i])
 			y.append(outpt)
+	if start_thread:
+		sys.exit()
 	return y
 
 
@@ -210,8 +216,8 @@ if __name__ == '__main__':
 	# run_client(sys.__stdin__, sys.__stdout__, 5)
 	# get_input_lines("input.txt")
 	# calc_ratio("input0", "output0")
-	results = str(collect_data())
+	results = str(collect_data(start_thread=False))
 	print(results)
-	f1 = open("results.txt", "w")
-	f1.write(results)
+	f1 = open("results.txt", "a")
+	f1.write(results + "\n")
 	f1.close()

@@ -219,5 +219,5 @@ if __name__ == '__main__':
 	results = str(collect_data(start_thread=False))
 	print(results)
 	f1 = open("results.txt", "a")
-	f1.write(results + "\n")
+	f1.write("\n\n" + results)
 	f1.close()

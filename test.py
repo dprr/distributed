@@ -1,6 +1,6 @@
 from main import run_servers
 from whatsapp_client import main as client
-from threading import Thread, Event
+from threading import Thread
 import matplotlib.pyplot as plt
 import sys
 import random
@@ -181,7 +181,7 @@ def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratios.txt",
 	ratiosf.close()
 	print("clients finished")
 	if start_thread:
-		sys.exit()
+		servers_thread._stop()
 	return sum_ratios
 
 

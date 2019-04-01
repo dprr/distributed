@@ -1,4 +1,4 @@
-from main import run_servers
+from test_servers import *
 from whatsapp_client import main as client
 from threading import Thread
 import matplotlib.pyplot as plt
@@ -206,31 +206,11 @@ def plot_len_of_board_graph(clients=10):
 	plt.show()
 
 
-def run_servers():
-	evil = random.randint(0, len(SERVER_PORTS) - 1)
-	for index, port in enumerate(SERVER_PORTS):
-		is_evil = False
-		if index == evil:
-			is_evil = True
-			print("server port " + str(port) + " is evil")
-		servers.append(Process(target=server.start_new_server, args=(local_host, port, is_evil)))
-	for ser in servers:
-		ser.start()
-	sleep(2)
-
-
-def kill_servers():
-	global servers
-	for ser in servers:
-		ser.terminate()
-	servers = []
-
-
 if __name__ == '__main__':
-	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=2))
-	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=3))
-	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=4))
-	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=5))
+	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=2))
+	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=3))
+	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=4))
+	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=5))
 	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=6))
 	# run_client(num_of_lines=100, start_servers=True)
 	# results = str(collect_data())

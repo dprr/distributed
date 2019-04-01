@@ -8,6 +8,10 @@ import string
 from os import remove
 from time import sleep
 from constants import *
+from multiprocessing import Process
+import server
+
+servers = []
 
 
 def gen_input(output="test.txt", num_lines=5):
@@ -95,14 +99,9 @@ def get_misses(ratio_file):
 	return inpt - own_output
 
 
-def run_client(input_file="input.txt", output_file="output.txt", ratio_file="ratio.txt", num_of_lines=5, start_tread=True):
-	if start_tread:
-		servers_thread = Thread(group=None, target=run_servers, name="servers thread")
-		servers_thread.start()
-		sleep(10)
-
-	# if sys.stdin.isatty():
-	# 	exit()
+def run_client(input_file="input.txt", output_file="output.txt", ratio_file="ratio.txt", num_of_lines=5, start_servers=True):
+	if start_servers:
+		run_servers()
 
 	# generate input
 	if input_file != sys.__stdin__:
@@ -111,25 +110,26 @@ def run_client(input_file="input.txt", output_file="output.txt", ratio_file="rat
 	# run client
 	client(input_file, output_file)
 
+	if start_servers:
+		kill_servers()
 	if output_file != sys.__stdout__ and input_file != sys.__stdin__:
 		calc_ratio(input_file, output_file, ratio_file)
 		remove(input_file)
 		remove(output_file)
 
-	if start_tread:
-		sys.exit()
 
-
-def collect_data(start_thread=True):
-	if start_thread:
-		servers_thread = Thread(target=run_servers)
-		servers_thread.start()
-		sleep(10)
+def collect_data(start_servers=True, num_of_lines=15, ratio_file="ratios.txt"):
+	# if start_servers:
+	# 	run_servers()
+	ratiosf = open(ratio_file, "a")
+	ratiosf.write("\n")
+	ratiosf.close()
 	global LEN_OF_BOARD
 	global EPOCH
-	board_lengths = list(range(5, 50, 1)) + list(range(50, 100, 2)) + list(range(100, 1000, 50))
-	users_num = list(range(2, 100, 1)) + list(range(100, 150, 10)) + list(range(150, 256, 50))
-	# board_lengths = [50, 100]
+	# board_lengths = list(range(5, 50, 1)) + list(range(50, 100, 2)) + list(range(100, 1000, 50))
+	board_lengths = list([50, 100])
+	# users_num = list(range(2, 100, 1)) + list(range(100, 150, 10)) + list(range(150, 256, 50))
+	users_num = list([2, 3])
 	y = []
 	for i in board_lengths:
 		LEN_OF_BOARD = i
@@ -144,18 +144,16 @@ def collect_data(start_thread=True):
 				EPOCH = 6
 			elif j < 100:
 				EPOCH = 8
-			outpt = tuple(run_many_clients(num_of_clients=j, num_of_lines=5, start_thread=False)) + tuple([i])
+			outpt = tuple(run_many_clients(j, num_of_lines, ratio_file, start_servers))
 			y.append(outpt)
-	if start_thread:
-		sys.exit()
+	# if start_servers:
+	# 	kill_servers()
 	return y
 
 
-def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratios.txt", start_thread=True):
-	if start_thread:
-		servers_thread = Thread(target=run_servers)
-		servers_thread.start()
-		sleep(10)
+def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratios.txt", start_servers=True):
+	if start_servers:
+		run_servers()
 	clients = []
 	for i in range(num_of_clients):
 		print("start client No. " + str(i) + ":")
@@ -172,22 +170,22 @@ def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratios.txt",
 		temp = get_ratios("ratio" + str(i))
 		remove("ratio" + str(i))
 		ratios.append(temp)
-		sum_ratios = (sum_ratios[0] + temp[1], sum_ratios[1] + temp[2])
-	sum_ratios = (sum_ratios[0] / sum_ratios[1], sum_ratios[0], sum_ratios[1], ratios[0][3], num_of_clients, LEN_OF_BOARD)
+		sum_ratios = (sum_ratios[0] + temp[0], sum_ratios[1] + temp[1])
+	sum_ratios = (sum_ratios[0], sum_ratios[1], ratios[0][2], num_of_clients, LEN_OF_BOARD)
 	print(ratios)
 	print(sum_ratios)
 	ratiosf = open(ratio_file, "a")
 	ratiosf.write(str(sum_ratios) + "\n")
 	ratiosf.close()
 	print("clients finished")
-	if start_thread:
-		servers_thread._stop()
+	if start_servers:
+		kill_servers()
 	return sum_ratios
 
 
 def plot_clients_graph():
 	x = range(2, 256)
-	y = [run_many_clients(i, start_thread=False)[0] for i in x]
+	y = [run_many_clients(i, start_servers=False)[0] for i in x]
 	plt.plot(x, y)
 	plt.xlabel('Number of clients')
 	plt.ylabel('Percentage of collisions')
@@ -200,7 +198,7 @@ def plot_len_of_board_graph(clients=10):
 	y = []
 	for i in x:
 		LEN_OF_BOARD = i
-		y.append(run_many_clients(clients, start_thread=False)[0])
+		y.append(run_many_clients(clients, start_servers=False)[0])
 	LEN_OF_BOARD = 50
 	plt.plot(x, y)
 	plt.xlabel('LEN_OF_BOARD')
@@ -208,11 +206,35 @@ def plot_len_of_board_graph(clients=10):
 	plt.show()
 
 
+def run_servers():
+	evil = random.randint(0, len(SERVER_PORTS) - 1)
+	for index, port in enumerate(SERVER_PORTS):
+		is_evil = False
+		if index == evil:
+			is_evil = True
+			print("server port " + str(port) + " is evil")
+		servers.append(Process(target=server.start_new_server, args=(local_host, port, is_evil)))
+	for ser in servers:
+		ser.start()
+	sleep(2)
+
+
+def kill_servers():
+	global servers
+	for ser in servers:
+		ser.terminate()
+	servers = []
+
+
 if __name__ == '__main__':
-	# print(run_many_clients(15, 10))
-	# run_client(num_of_lines=15)
-	results = str(collect_data(start_thread=False))
-	print(results)
-	f1 = open("results.txt", "a")
-	f1.write("\n\n" + results)
-	f1.close()
+	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=2))
+	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=3))
+	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=4))
+	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=5))
+	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=6))
+	# run_client(num_of_lines=100, start_servers=True)
+	# results = str(collect_data())
+	# print(results)
+	# f1 = open("results.txt", "a")
+	# f1.write("\n\n" + results)
+	# f1.close()

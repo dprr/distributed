@@ -8,10 +8,13 @@ import string
 from os import remove
 from time import sleep
 from constants import *
-from multiprocessing import Process
 import server
+import numpy as np
 
 servers = []
+TITLES = ["Percentage of Successfully delivered",
+		  "Percentage of Collided messages",
+		  "Percentage of Lost messages"]
 
 
 def gen_input(output="test.txt", num_lines=5):
@@ -58,7 +61,7 @@ def get_input_lines(input_file):
 	messages = []
 	for i in range(len(inpt)):
 		if inpt[i][:-1] == "s":
-			messages.append(inpt[i+1][:-1])
+			messages.append(inpt[i + 1][:-1])
 			i += 2
 	return messages
 
@@ -111,10 +114,29 @@ def get_data(ratios_file):
 	for line in f1:
 		data.append(parse_line(line))
 	f1.close()
-	return data
+	dictionary = {}
+	for datum in data:
+		if datum[4] not in dictionary:
+			dictionary[datum[4]] = {}
+		success = datum[1] / datum[0]
+		fail = datum[2] / datum[0]
+		lost = (datum[0] - datum[1] - datum[2] * 2) / datum[0]
+		dictionary[datum[4]][datum[3]] = [success, fail, lost]
+	board_sizes = list(dictionary.keys())
+	clients = list(dictionary[board_sizes[0]].keys())
+	success = np.zeros(shape=[len(board_sizes), len(clients)])
+	fail = np.zeros(shape=[len(board_sizes), len(clients)])
+	lost = np.zeros(shape=[len(board_sizes), len(clients)])
+	for i in range(len(board_sizes)):
+		for j in range(len(clients)):
+			success[i, j] = dictionary[board_sizes[i]][clients[j]][0]
+			fail[i, j] = dictionary[board_sizes[i]][clients[j]][1]
+			lost[i, j] = dictionary[board_sizes[i]][clients[j]][2]
+	return [success, fail, lost], [board_sizes, clients]
 
 
-def run_client(input_file="input.txt", output_file="output.txt", ratio_file="ratio.txt", num_of_lines=5, start_servers=True):
+def run_client(input_file="input.txt", output_file="output.txt", ratio_file="ratio.txt", num_of_lines=5,
+			   start_servers=True):
 	if start_servers:
 		run_servers()
 
@@ -198,37 +220,31 @@ def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratios.txt",
 	return sum_ratios
 
 
-def plot_clients_graph():
-	x = range(2, 256)
-	y = [run_many_clients(i, start_servers=False)[0] for i in x]
-	plt.plot(x, y)
+def plot_data(data_file="data.txt", to_save=False):
+	data, info = get_data(data_file)
+	plt.rcParams.update({'font.size': 22})
+	fig, ax = plt.subplots(3, 1, sharex='all', sharey='all', figsize=(20, 10))
+	plt.subplots_adjust(hspace=0.5)
 	plt.xlabel('Number of clients')
-	plt.ylabel('Percentage of collisions')
-	plt.show()
-
-
-def plot_len_of_board_graph(clients=10):
-	global LEN_OF_BOARD
-	x = list(range(5, 50, 1)) + list(range(50, 100, 2)) + list(range(100, 1000, 50))
-	y = []
-	for i in x:
-		LEN_OF_BOARD = i
-		y.append(run_many_clients(clients, start_servers=False)[0])
-	LEN_OF_BOARD = 50
-	plt.plot(x, y)
-	plt.xlabel('LEN_OF_BOARD')
-	plt.ylabel('Percentage of collisions')
-	plt.show()
+	plt.ylabel('Length of board')
+	plt.xticks(np.arange(len(info[1])), info[1])
+	plt.yticks(np.arange(len(info[0])), info[0])
+	for i in range(3):
+		ax[i].pcolor(data[i])
+		ax[i].set_title(TITLES[i])
+	if to_save:
+		plt.savefig('data plot.png')
+	else:
+		plt.show()
 
 
 if __name__ == '__main__':
-	#for i in range(2, 51):
+	plot_data(to_save=True)
+	# for i in range(2, 51):
 	#	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=i))
 	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=19))
 	# run_client(num_of_lines=100, start_servers=True)
 	# results = str(collect_data())
 	# print(results)
-	# f1 = open("results.txt", "a")
-	# f1.write("\n\n" + results)
-	# f1.close()
-	print(get_data("data.txt"))
+	# for a in data:
+	# 	print(data[a])

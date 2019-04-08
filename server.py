@@ -16,6 +16,8 @@ class Server:
 	Once an epoch it sends the total share to all of the clients and resets the total share list.
 	"""
 	def __init__(self, host, port, is_evil=False):
+		global LEN_OF_BOARD
+		global EPOCH
 		self.__evil = is_evil
 		self.selector = selectors.DefaultSelector()
 		self.__message_vector = [0] * LEN_OF_BOARD

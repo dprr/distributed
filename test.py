@@ -207,11 +207,8 @@ def plot_len_of_board_graph(clients=10):
 
 
 if __name__ == '__main__':
-	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=2))
-	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=3))
-	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=4))
-	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=5))
-	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=6))
+	for i in range(2, 51):
+		print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=i))
 	# run_client(num_of_lines=100, start_servers=True)
 	# results = str(collect_data())
 	# print(results)

@@ -80,23 +80,38 @@ def get_output_lines(output_file):
 	return dump, collisions
 
 
-def get_ratios(ratio_file):
+def parse_line(line):
+	import re
+	line = re.sub('[\[\]()\'\n]', '', line)
+	line = line.split(", ")
+	output = []
+	for arg in line:
+		output.append(int(arg))
+	return output
+
+
+def get_ratio(ratio_file):
 	f1 = open(ratio_file, "r")
-	inpt = f1.readline()
+	inpt_line = parse_line(f1.readline())
 	f1.close()
-	tmp = inpt[:-1]
-	tmp = tmp.replace('[', '')
-	tmp = tmp.replace(']', '')
-	tmp = tmp.split(", ")
-	inpt = int(tmp[0])
-	own_output = int(tmp[1])
-	collisions = int(tmp[2])
+	inpt = int(inpt_line[0])
+	own_output = int(inpt_line[1])
+	collisions = int(inpt_line[2])
 	return inpt, own_output, collisions
 
 
 def get_misses(ratio_file):
-	inpt, own_output, collisions = get_ratios(ratio_file)
+	inpt, own_output, collisions = get_ratio(ratio_file)
 	return inpt - own_output
+
+
+def get_data(ratios_file):
+	data = []
+	f1 = open(ratios_file, "r")
+	for line in f1:
+		data.append(parse_line(line))
+	f1.close()
+	return data
 
 
 def run_client(input_file="input.txt", output_file="output.txt", ratio_file="ratio.txt", num_of_lines=5, start_servers=True):
@@ -167,7 +182,7 @@ def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratios.txt",
 	ratios = []
 	sum_ratios = [0, 0]
 	for i in range(num_of_clients):
-		temp = get_ratios("ratio" + str(i))
+		temp = get_ratio("ratio" + str(i))
 		remove("ratio" + str(i))
 		ratios.append(temp)
 		sum_ratios = (sum_ratios[0] + temp[0], sum_ratios[1] + temp[1])
@@ -207,11 +222,13 @@ def plot_len_of_board_graph(clients=10):
 
 
 if __name__ == '__main__':
-	for i in range(2, 51):
-		print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=i))
+	#for i in range(2, 51):
+	#	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=i))
+	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=19))
 	# run_client(num_of_lines=100, start_servers=True)
 	# results = str(collect_data())
 	# print(results)
 	# f1 = open("results.txt", "a")
 	# f1.write("\n\n" + results)
 	# f1.close()
+	print(get_data("data.txt"))

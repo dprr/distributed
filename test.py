@@ -232,6 +232,9 @@ def plot_data(data_file="data.txt", to_save=False):
 	for i in range(3):
 		ax[i].pcolor(data[i])
 		ax[i].set_title(TITLES[i])
+	plt.subplots_adjust(bottom=0.1, right=0.8, top=0.9)
+	cax = plt.axes([0.85, 0.1, 0.075, 0.8])
+	plt.colorbar()
 	if to_save:
 		plt.savefig('data plot.png')
 	else:
@@ -239,7 +242,7 @@ def plot_data(data_file="data.txt", to_save=False):
 
 
 if __name__ == '__main__':
-	plot_data(to_save=True)
+	plot_data(to_save=False)
 	# for i in range(2, 51):
 	#	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=i))
 	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=19))

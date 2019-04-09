@@ -222,19 +222,27 @@ def run_many_clients(num_of_clients=3, num_of_lines=10, ratio_file="ratios.txt",
 
 def plot_data(data_file="data.txt", to_save=False):
 	data, info = get_data(data_file)
+	# a = np.array([[0, 1], [0.2, 0.8]])
+	# b = np.array([[0.8, 0.1], [0.2, 0.8]])
+	# c = np.array([[0.5, 0.7], [0.2, 0.6]])
+	# data = a, b, c
+	# info = np.array([[0, 1], [0.2, 0.8]])
 	plt.rcParams.update({'font.size': 22})
-	fig, ax = plt.subplots(3, 1, sharex='all', sharey='all', figsize=(20, 10))
-	plt.subplots_adjust(hspace=0.5)
+	fig, ax = plt.subplots(3, sharex='all', sharey='all', figsize=(13, 10))
 	plt.xlabel('Number of clients')
-	plt.ylabel('Length of board')
+	ax[1].set_ylabel('Length of board')
 	plt.xticks(np.arange(len(info[1])), info[1])
 	plt.yticks(np.arange(len(info[0])), info[0])
 	for i in range(3):
-		ax[i].pcolor(data[i])
+		b = ax[i].pcolor(data[i], vmin=0, vmax=1, cmap='jet')
 		ax[i].set_title(TITLES[i])
-	plt.subplots_adjust(bottom=0.1, right=0.8, top=0.9)
-	cax = plt.axes([0.85, 0.1, 0.075, 0.8])
-	plt.colorbar()
+		bounds = list(ax[i].get_position().bounds)
+		bounds[2] = 0.7
+		ax[i].set_position(pos=bounds)
+	cbar_ax = fig.add_axes([0.85, 0.11, 0.05, 0.77])
+	fig.colorbar(b, cax=cbar_ax)
+	# fig.subplots_adjust(wspace=5000)
+	# plt.tight_layout()
 	if to_save:
 		plt.savefig('data plot.png')
 	else:
@@ -242,7 +250,8 @@ def plot_data(data_file="data.txt", to_save=False):
 
 
 if __name__ == '__main__':
-	plot_data(to_save=False)
+	# plot_data(to_save=False)
+	plot_data(to_save=True)
 	# for i in range(2, 51):
 	#	print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=i))
 	# print(run_many_clients(start_servers=True, num_of_lines=100, num_of_clients=19))

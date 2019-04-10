@@ -120,3 +120,11 @@ Regardless as to what the malicious server does, the system is live.
 Every epoch each client sends a message and every epoch the 
 clients receive at least three parts of all of the messages. 
 Therefore, there is no stage where liveness can be broken. 
+
+## Performance analysis
+Below are three graphs where it can be seen what the percentage
+of collision, losses and successes are in relation to the size of the
+board and the number of users. Using that information the admin of such 
+a message group can decide how many users to let in and how big to make the 
+board.
+![](data%20plot.png)
